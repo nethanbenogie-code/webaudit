@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>SEO Dashboard | Multi‑User + Admin Panel</title>
+    <!-- Leaflet CSS/JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-gradient-start: #f6f9fc;
+            --bg-gradient-end: #eef2f5;
+            --card-bg: rgba(255,255,255,0.85);
+            --text-primary: #1a2c3e;
+            --border-color: #dce9f0;
+            --accent: #1f5e7e;
+            --accent-hover: #0f425b;
+            --success: #2b9348;
+            --warning: #f4a261;
+            --danger: #e85d04;
+        }
+        body.dark {
+            --bg-gradient-start: #1a2a3a;
+            --bg-gradient-end: #0f1a24;
+            --card-bg: rgba(30,40,50,0.9);
+            --text-primary: #e2e8f0;
+            --border-color: #2d3e4e;
+            --accent: #3b8db0;
+        }
+        body {
+            background: linear-gradient(145deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            padding: 2rem 1.5rem;
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+        h1 { font-size: 2.2rem; font-weight: 700; background: linear-gradient(135deg, #0b2b3b, #1b4f6e); -webkit-background-clip: text; background-clip: text; color: transparent; display: inline-block; margin-bottom: 0.5rem; }
+        .subhead { color: var(--accent); margin-bottom: 2rem; border-left: 4px solid var(--accent); padding-left: 1rem; font-weight: 500; }
+        .card { background: var(--card-bg); backdrop-filter: blur(2px); border-radius: 2rem; box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1); padding: 1.8rem; margin-bottom: 2rem; transition: all 0.2s; border: 1px solid var(--border-color); }
+        .input-group { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; align-items: center; }
+        .input-group input, .input-group textarea, .input-group select { flex: 1; padding: 0.9rem 1.2rem; font-size: 1rem; border: 1px solid var(--border-color); border-radius: 2rem; background: white; font-family: inherit; }
+        button { background: var(--accent); border: none; color: white; font-weight: 600; padding: 0 1.8rem; border-radius: 3rem; font-size: 1rem; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        button:hover { background: var(--accent-hover); transform: scale(0.97); }
+        .mode-selector, .style-toolbar { display: flex; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+        .mode-btn, .style-btn { background: #e2eaf0; color: #1e3b4a; box-shadow: none; padding: 0.5rem 1.2rem; }
+        .mode-btn.active, .style-btn.active { background: var(--accent); color: white; }
+        .badge { background: #eef2f7; padding: 0.25rem 0.9rem; border-radius: 40px; font-size: 0.8rem; font-weight: 600; color: #2c5a74; }
+        .pagespeed-scores { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
+        .score-card { flex: 1; min-width: 120px; background: white; border-radius: 1rem; padding: 0.8rem; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .score-number { font-size: 2rem; font-weight: 800; }
+        .good { color: #2b9348; } .average { color: #f4a261; } .poor { color: #e85d04; }
+        .checklist { display: flex; flex-direction: column; gap: 0.75rem; }
+        .check-item { background: white; border-radius: 1rem; padding: 0.8rem 1rem; border-left: 5px solid #ccc; }
+        .check-item.pass { border-left-color: #2b9348; background: #f0f9f0; }
+        .check-item.fail { border-left-color: #e85d04; background: #fff5f0; }
+        .check-item.warning { border-left-color: #f4a261; background: #fffaf2; }
+        .solution-link { margin-top: 8px; display: inline-flex; gap: 6px; background: #eef2fb; padding: 4px 12px; border-radius: 30px; font-size: 0.75rem; text-decoration: none; color: var(--accent); }
+        .visitor-stats { display: flex; flex-wrap: wrap; gap: 1.5rem; margin: 1rem 0; }
+        .stat-card { background: white; border-radius: 1.5rem; padding: 1rem 1.5rem; flex: 1; min-width: 150px; text-align: center; }
+        .stat-number { font-size: 2.4rem; font-weight: 800; color: var(--accent); }
+        #map { height: 400px; border-radius: 1rem; margin: 1rem 0; z-index: 1; background: #eee; }
+        .location-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .location-table th, .location-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        .chart-container { max-width: 100%; margin: 1rem 0; }
+        canvas { max-height: 300px; width: 100%; }
+        .admin-only { display: none; }
+        .admin-bar { display: flex; justify-content: space-between; margin-bottom: 1rem; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .login-wrapper {
+            display: flex;
+            max-width: 1100px;
+            margin: 2rem auto;
+            background: var(--card-bg);
+            border-radius: 2rem;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            backdrop-filter: blur(4px);
+        }
+        .login-form-side {
+            flex: 1;
+            padding: 2rem;
+            border-right: 1px solid var(--border-color);
+        }
+        .about-side {
+            flex: 1;
+            padding: 2rem;
+            background: rgba(0,0,0,0.03);
+        }
+        .feature-list {
+            list-style: none;
+            margin-top: 1.5rem;
+        }
+        .feature-list li {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        .feature-list i {
+            width: 28px;
+            color: var(--accent);
+            font-size: 1.2rem;
+        }
+        .login-box {
+            text-align: center;
+        }
+        .login-box input, .login-box .checkbox-group {
+            width: 100%;
+            margin: 0.8rem 0;
+        }
+        .login-box input {
+            padding: 0.8rem;
+            border-radius: 2rem;
+            border: 1px solid var(--border-color);
+            background: white;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+        .user-menu { display: flex; align-items: center; gap: 1rem; }
+        footer { text-align: center; font-size: 0.75rem; margin-top: 2rem; color: #5b7f95; }
+        .spinner {
+            display: inline-block;
+            width: 1.5rem;
+            height: 1.5rem;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 700px) {
+            body { padding: 1rem; }
+            .card { padding: 1.2rem; }
+            .login-wrapper { flex-direction: column; }
+            .login-form-side { border-right: none; border-bottom: 1px solid var(--border-color); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Login Overlay (full screen) -->
+<div id="loginOverlay" class="login-overlay" style="display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 1000; overflow-y: auto;">
+    <div class="login-wrapper">
+        <div class="login-form-side">
+            <div id="loginPanel">
+                <div class="login-box">
+                    <h2><i class="fas fa-sign-in-alt"></i> Welcome Back</h2>
+                    <p style="margin-bottom:1rem;">Login to access your dashboard</p>
+                    <input type="text" id="loginUsername" placeholder="Username">
+                    <input type="password" id="loginPassword" placeholder="Password">
+                    <button id="loginBtn" style="width:100%; margin-top:1rem;">Login</button>
+                    <button id="showSignupBtn" style="background:#ccc; width:100%; margin-top:0.5rem;">Create Account</button>
+                    <div id="loginMessage" style="margin-top:1rem; color:red; font-size:0.8rem;"></div>
+                </div>
+            </div>
+            <div id="signupPanel" style="display:none;">
+                <div class="login-box">
+                    <h2><i class="fas fa-user-plus"></i> Create Account</h2>
+                    <p style="margin-bottom:1rem;">Join to track your website's SEO & visitors</p>
+                    <input type="text" id="signupUsername" placeholder="Username">
+                    <input type="password" id="signupPassword" placeholder="Password">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="consentCheckbox">
+                        <label for="consentCheckbox">I consent to login tracking (timestamp, hashed IP, browser info) for platform analytics only. This data is never sold to third parties.</label>
+                    </div>
+                    <button id="signupBtn" style="width:100%; margin-top:1rem;">Register</button>
+                    <button id="backToLoginBtn" style="background:#ccc; width:100%; margin-top:0.5rem;">Back to Login</button>
+                    <div id="signupMessage" style="margin-top:1rem; color:red; font-size:0.8rem;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="about-side">
+            <h2><i class="fas fa-chart-line"></i> About This Platform</h2>
+            <p style="margin: 1rem 0; line-height:1.5;">A complete SEO & visitor intelligence dashboard for website owners, marketers, and developers. <strong>All data stays private</strong> – stored locally or optionally synced to your own Google Sheet.</p>
+            <ul class="feature-list">
+                <li><i class="fas fa-check-circle"></i> <strong>SEO Audit</strong> – Title, meta description, headings, alt text, viewport, HTTPS, robots, language, word count, DOCTYPE.</li>
+                <li><i class="fas fa-tachometer-alt"></i> <strong>PageSpeed Insights</strong> – Performance, accessibility, best practices, SEO scores + Core Web Vitals (LCP, FID, CLS).</li>
+                <li><i class="fas fa-map-marked-alt"></i> <strong>Visitor Map</strong> – See where your visitors come from on an interactive world map.</li>
+                <li><i class="fas fa-chart-bar"></i> <strong>Time‑Series Charts</strong> – Daily, weekly, monthly visit trends.</li>
+                <li><i class="fas fa-cloud-upload-alt"></i> <strong>Google Sheets Backup</strong> – Sync visitor data and user accounts to your own cloud sheet (optional).</li>
+                <li><i class="fas fa-users"></i> <strong>Multi‑User & Roles</strong> – Admins can manage users, viewers can only view data.</li>
+                <li><i class="fas fa-history"></i> <strong>Login History</strong> – Admins can see who logged in, when, and from which browser (consent required).</li>
+                <li><i class="fas fa-download"></i> <strong>Export CSV</strong> – Download visitor history as a spreadsheet.</li>
+                <li><i class="fas fa-palette"></i> <strong>Customizable UI</strong> – Light/dark theme, accent colors.</li>
+            </ul>
+            <div class="badge" style="margin-top:1rem;">🔐 Your data never leaves your browser unless you connect Google Sheets.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard (hidden until login) -->
+<div class="container" id="mainContent" style="display: none;">
+    <h1><i class="fas fa-chart-line"></i> SEO & Visitor Dashboard</h1>
+    <div class="subhead">Multi‑User · Role‑Based Access · Google Sheets Database</div>
+
+    <div class="card" style="padding: 1rem;">
+        <div class="admin-bar">
+            <div class="user-menu">
+                <span class="badge" id="userRoleBadge"></span>
+                <span id="usernameDisplay" style="font-weight:600;"></span>
+                <button id="logoutBtn" style="background:#555; padding:0.3rem 1rem;">Logout</button>
+            </div>
+            <div id="adminControls" class="admin-only">
+                <button id="exportCsvBtn" style="background:#2c7da0;"><i class="fas fa-download"></i> Export CSV</button>
+                <button id="clearHistoryBtn" style="background:#b91c1c;"><i class="fas fa-trash"></i> Clear History</button>
+                <button id="manageUsersBtn" style="background:#9c27b0;"><i class="fas fa-user-cog"></i> Manage Users</button>
+                <button id="viewLoginHistoryBtn" style="background:#e67e22;"><i class="fas fa-history"></i> Login History</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Style Toolbar -->
+    <div class="card">
+        <div class="style-toolbar">
+            <button id="lightThemeBtn" class="style-btn active">☀️ Light Theme</button>
+            <button id="darkThemeBtn" class="style-btn">🌙 Dark Theme</button>
+            <select id="accentColorPicker">
+                <option value="#1f5e7e">Default Blue</option>
+                <option value="#2b9348">Green</option>
+                <option value="#e85d04">Orange</option>
+                <option value="#9c27b0">Purple</option>
+            </select>
+            <span class="badge">Customizable UI</span>
+        </div>
+    </div>
+
+    <!-- Google Sheets Sync (admin only) -->
+    <div class="card" id="gsheetCard">
+        <div class="score-header">
+            <strong><i class="fas fa-cloud-upload-alt"></i> Google Sheets Cloud Database</strong>
+            <span class="badge" id="gsheetStatus">Not connected</span>
+        </div>
+        <div class="input-group">
+            <input type="text" id="gsheetApiUrl" placeholder="https://script.google.com/macros/s/.../exec">
+            <button id="testGSheetBtn">Test Connection</button>
+            <button id="syncToGSheetBtn" style="background:#2b9348;">☁️ Sync Data to Sheets</button>
+        </div>
+        <div id="gsheetMessage" style="font-size: 0.8rem; margin-top: 0.5rem;"></div>
+        <div class="badge" style="margin-top: 0.5rem;">💡 Admin only: connect your Google Sheet for cloud backup & user management.</div>
+    </div>
+
+    <!-- User Management Modal -->
+    <div id="userMgmtModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1001; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:2rem; padding:2rem; max-width:500px; width:90%; max-height:80%; overflow:auto;">
+            <h3>Manage Users</h3>
+            <div class="input-group"><input type="text" id="newUsername" placeholder="New username"><input type="password" id="newPassword" placeholder="Password"><select id="newRole"><option value="viewer">Viewer</option><option value="admin">Admin</option></select><button id="addUserBtn">Add</button></div>
+            <div id="usersList" style="margin-top:1rem;"></div>
+            <button id="closeUserMgmtBtn" style="margin-top:1rem; background:#555;">Close</button>
+        </div>
+    </div>
+
+    <!-- Login History Modal (admin only) -->
+    <div id="loginHistoryModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1001; align-items:center; justify-content:center;">
+        <div style="background:white; border-radius:2rem; padding:2rem; max-width:800px; width:90%; max-height:80%; overflow:auto;">
+            <h3><i class="fas fa-history"></i> Login History</h3>
+            <p style="font-size:0.8rem; margin-bottom:1rem;">🔒 IP addresses are hashed, user agent stored for platform analytics only. No data shared with third parties.</p>
+            <div id="loginHistoryList" style="max-height: 400px; overflow-y: auto;"></div>
+            <button id="closeHistoryModalBtn" style="margin-top:1rem; background:#555;">Close</button>
+        </div>
+    </div>
+
+    <!-- Audit Section -->
+    <div class="card">
+        <div class="mode-selector">
+            <button id="modeUrlBtn" class="mode-btn active">🌐 Audit Live URL</button>
+            <button id="modeHtmlBtn" class="mode-btn">📄 Audit HTML Code</button>
+        </div>
+        <div id="urlSection">
+            <div class="input-group">
+                <input type="text" id="targetUrl" placeholder="https://example.com">
+                <button id="runAuditBtn">🔍 SEO Audit</button>
+                <button id="runPagespeedBtn" style="background:#2c7da0;">⚡ PageSpeed Audit</button>
+            </div>
+            <div class="input-group">
+                <input type="text" id="apiKeyInput" placeholder="Google PageSpeed API Key (optional)">
+                <span class="badge"><a href="https://developers.google.com/speed/docs/insights/v5/get-started" target="_blank">Get free key</a></span>
+            </div>
+        </div>
+        <div id="htmlSection" style="display: none;">
+            <textarea id="htmlCodeInput" placeholder="Paste HTML code..."></textarea>
+            <button id="runHtmlAuditBtn" style="margin-top:1rem;">📝 Audit Pasted HTML</button>
+        </div>
+    </div>
+
+    <!-- Visitor Intelligence Card -->
+    <div class="card" id="visitorCard">
+        <div class="score-header"><strong><i class="fas fa-globe"></i> Real-time Visitor Intelligence</strong><span class="badge" id="visitorTimestamp"></span></div>
+        <div class="visitor-stats">
+            <div class="stat-card"><div class="stat-number" id="totalVisitors">-</div><div class="stat-label">Total Visitors</div></div>
+            <div class="stat-card"><div class="stat-number" id="todayVisitors">-</div><div class="stat-label">Today</div></div>
+            <div class="stat-card"><div class="stat-number" id="activeNow">-</div><div class="stat-label">Active Now (5 min)</div></div>
+        </div>
+        <div id="currentLocation" style="background:#f0f7ff; border-radius:1rem; padding:1rem; margin-bottom:1rem;">Detecting your location...</div>
+        <div id="map"></div>
+        <div class="chart-container"><canvas id="visitsChart"></canvas></div>
+        <div style="display:flex; gap:1rem; margin:1rem 0; flex-wrap:wrap;">
+            <select id="chartRangeSelect">
+                <option value="daily">Daily (Last 30 days)</option>
+                <option value="weekly">Weekly (Last 12 weeks)</option>
+                <option value="monthly">Monthly (Last 12 months)</option>
+            </select>
+        </div>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table class="location-table" id="visitorTable">
+                <thead><tr><th>Time</th><th>IP (hash)</th><th>Country</th><th>City</th><th>Region</th><th>ISP</th><th>Lat/Lon</th></tr></thead>
+                <tbody id="visitorTableBody"><tr><td colspan="7">Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card" id="resultsCard" style="display:none;"><div class="score-header"><strong>📋 Audit Report</strong><span class="badge" id="auditTimestamp"></span></div><div id="auditResults" class="checklist"></div></div>
+    <div class="card" id="pagespeedCard" style="display:none;"><div class="score-header"><strong>🚀 PageSpeed Report</strong><span class="badge" id="psTimestamp"></span></div><div id="pagespeedResults"></div></div>
+    <footer>🔍 SEO audit + PageSpeed + Visitor map + Chart + Role‑based access + Google Sheets backup + Login history (admin only, with user consent).</footer>
+</div>
+
+<script>
+// ========================= USER MANAGEMENT & CONSENT =========================
+let currentUser = null;
+let users = [];
+
+const LOGIN_HISTORY_KEY = 'login_history';
+
+async function hashIP(ip) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(ip + 'salt_2026');
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('').substring(0, 16);
+}
+
+async function recordLogin(username) {
+    try {
+        let ipHash = 'unknown';
+        try {
+            const res = await fetch('https://api.ipify.org?format=json');
+            const data = await res.json();
+            ipHash = await hashIP(data.ip);
+        } catch(e) { console.warn("Could not get IP"); }
+        const userAgent = navigator.userAgent;
+        const entry = {
+            timestamp: new Date().toISOString(),
+            username: username,
+            ipHash: ipHash,
+            userAgent: userAgent.substring(0, 200)
+        };
+        let history = JSON.parse(localStorage.getItem(LOGIN_HISTORY_KEY) || '[]');
+        history.unshift(entry);
+        if (history.length > 200) history.pop();
+        localStorage.setItem(LOGIN_HISTORY_KEY, JSON.stringify(history));
+    } catch(e) { console.warn("Failed to record login", e); }
+}
+
+function getLoginHistory() {
+    return JSON.parse(localStorage.getItem(LOGIN_HISTORY_KEY) || '[]');
+}
+
+async function loadUsers() {
+    const apiUrl = document.getElementById('gsheetApiUrl')?.value.trim() || localStorage.getItem('gsheet_api_url') || '';
+    if (apiUrl) {
+        try {
+            const res = await fetch(`${apiUrl}?action=readUsers`, { mode: 'cors' });
+            const data = await res.json();
+            if (data.success && Array.isArray(data.data)) {
+                users = data.data;
+                saveUsersToLocal();
+                return;
+            }
+        } catch(e) { console.warn("Could not load users from sheet, using local backup"); }
+    }
+    const local = localStorage.getItem('dashboard_users');
+    if (local) users = JSON.parse(local);
+    if (!users.length) users = [{ username: 'admin', password: 'admin123', role: 'admin', consent: true }];
+    saveUsersToLocal();
+}
+
+function saveUsersToLocal() {
+    localStorage.setItem('dashboard_users', JSON.stringify(users));
+}
+
+async function saveUsersToSheet() {
+    const apiUrl = document.getElementById('gsheetApiUrl')?.value.trim();
+    if (!apiUrl) return;
+    try {
+        await fetch(apiUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'syncUsers', users: users })
+        });
+    } catch(e) { console.warn("Could not sync users to sheet"); }
+}
+
+async function addUser(username, password, role, consent = true) {
+    if (users.find(u => u.username === username)) return false;
+    users.push({ username, password, role, consent });
+    saveUsersToLocal();
+    await saveUsersToSheet();
+    return true;
+}
+
+async function deleteUser(username) {
+    if (username === 'admin') return false;
+    users = users.filter(u => u.username !== username);
+    saveUsersToLocal();
+    await saveUsersToSheet();
+    return true;
+}
+
+async function updateUserConsent(username, consent) {
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.consent = consent;
+        saveUsersToLocal();
+        await saveUsersToSheet();
+        if (currentUser && currentUser.username === username) currentUser.consent = consent;
+    }
+}
+
+async function authenticate(username, password) {
+    const user = users.find(u => u.username === username && u.password === password);
+    if (user) {
+        currentUser = user;
+        if (user.consent !== false) {
+            await recordLogin(username);
+        }
+        sessionStorage.setItem('loggedInUser', JSON.stringify(user));
+        return true;
+    }
+    return false;
+}
+
+function logout() {
+    currentUser = null;
+    sessionStorage.removeItem('loggedInUser');
+    document.getElementById('mainContent').style.display = 'none';
+    document.getElementById('loginOverlay').style.display = 'flex';
+}
+
+function checkExistingLogin() {
+    const saved = sessionStorage.getItem('loggedInUser');
+    if (saved) {
+        currentUser = JSON.parse(saved);
+        document.getElementById('mainContent').style.display = 'block';
+        document.getElementById('loginOverlay').style.display = 'none';
+        updateUIForRole();
+        if (!currentUser.consent) {
+            showConsentPrompt();
+        }
+        return true;
+    }
+    return false;
+}
+
+function updateUIForRole() {
+    document.getElementById('usernameDisplay').innerText = currentUser.username;
+    document.getElementById('userRoleBadge').innerText = currentUser.role === 'admin' ? 'Admin' : 'Viewer';
+    const isAdmin = currentUser.role === 'admin';
+    document.querySelectorAll('.admin-only').forEach(el => el.style.display = isAdmin ? 'flex' : 'none');
+    if (!isAdmin) {
+        document.getElementById('gsheetCard').style.opacity = '0.5';
+        document.querySelectorAll('#gsheetCard button').forEach(btn => btn.disabled = true);
+    } else {
+        document.getElementById('gsheetCard').style.opacity = '1';
+        document.querySelectorAll('#gsheetCard button').forEach(btn => btn.disabled = false);
+    }
+}
+
+function showConsentPrompt() {
+    const overlay = document.createElement('div');
+    overlay.className = 'consent-modal';
+    overlay.innerHTML = `
+        <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; display:flex; align-items:center; justify-content:center;">
+            <div style="background:white; border-radius:2rem; padding:2rem; max-width:500px; text-align:center;">
+                <h3><i class="fas fa-shield-alt"></i> Privacy Consent Required</h3>
+                <p style="margin:1rem 0;">This platform tracks login events (timestamp, hashed IP, browser info) for analytics and security. This data is never sold to third parties.</p>
+                <div class="checkbox-group" style="justify-content:center;">
+                    <input type="checkbox" id="consentConfirm">
+                    <label for="consentConfirm">I agree to login tracking</label>
+                </div>
+                <button id="consentAcceptBtn" style="margin-top:1rem;">Accept & Continue</button>
+                <button id="consentLogoutBtn" style="background:#b91c1c; margin-top:0.5rem;">Logout (I do not consent)</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(overlay);
+    document.getElementById('consentAcceptBtn').onclick = async () => {
+        const cb = document.getElementById('consentConfirm');
+        if (cb.checked) {
+            await updateUserConsent(currentUser.username, true);
+            await recordLogin(currentUser.username);
+            overlay.remove();
+            currentUser.consent = true;
+            sessionStorage.setItem('loggedInUser', JSON.stringify(currentUser));
+        } else {
+            alert('You must accept to continue using the platform.');
+        }
+    };
+    document.getElementById('consentLogoutBtn').onclick = () => {
+        logout();
+        overlay.remove();
+    };
+}
+
+// ========================= DASHBOARD FUNCTIONS =========================
+const STORAGE_KEY_TOTAL = 'website_total_visitors';
+const STORAGE_KEY_HISTORY = 'website_visitor_history';
+const STORAGE_KEY_DAILY = 'website_daily_visitors';
+const STORAGE_KEY_ACTIVE = 'website_active_users';
+
+function getToday() { return new Date().toISOString().split('T')[0]; }
+
+async function updateTotalVisitors() {
+    let total = localStorage.getItem(STORAGE_KEY_TOTAL);
+    if (total === null) total = 1;
+    else if (!sessionStorage.getItem('visitor_counted')) { total = parseInt(total) + 1; sessionStorage.setItem('visitor_counted','true'); }
+    localStorage.setItem(STORAGE_KEY_TOTAL, total);
+    document.getElementById('totalVisitors').innerText = total;
+}
+async function updateDailyVisitors() {
+    const today = getToday();
+    let daily = JSON.parse(localStorage.getItem(STORAGE_KEY_DAILY) || '{}');
+    if (!sessionStorage.getItem('daily_counted_'+today)) { daily[today] = (daily[today]||0)+1; sessionStorage.setItem('daily_counted_'+today,'true'); }
+    localStorage.setItem(STORAGE_KEY_DAILY, JSON.stringify(daily));
+    document.getElementById('todayVisitors').innerText = daily[today] || 0;
+}
+function updateActiveUsers() {
+    let active = JSON.parse(localStorage.getItem(STORAGE_KEY_ACTIVE) || '{}');
+    let sessionId = sessionStorage.getItem('visitor_session_id');
+    if (!sessionId) { sessionId = 'sess_'+Date.now()+'_'+Math.random(); sessionStorage.setItem('visitor_session_id', sessionId); }
+    active[sessionId] = Date.now();
+    for (let id in active) if (Date.now() - active[id] > 300000) delete active[id];
+    localStorage.setItem(STORAGE_KEY_ACTIVE, JSON.stringify(active));
+    document.getElementById('activeNow').innerText = Object.keys(active).length;
+}
+
+async function getLocationData() {
+    const apis = ['https://ipapi.co/json/', 'https://ipinfo.io/json?token=YOUR_TOKEN', 'http://ip-api.com/json/', 'http://geoplugin.net/json.gp'];
+    for (let api of apis) {
+        try {
+            let res = await fetch(api, { signal: AbortSignal.timeout(5000) });
+            let data = await res.json();
+            if (api.includes('ipapi.co')) return { country: data.country_name, city: data.city, region: data.region, isp: data.org, lat: data.latitude, lon: data.longitude, query: data.ip };
+            if (api.includes('ipinfo.io')) { let loc = data.loc ? data.loc.split(',') : [null,null]; return { country: data.country, city: data.city, region: data.region, isp: data.org, lat: loc[0], lon: loc[1], query: data.ip }; }
+            if (api.includes('ip-api.com') && data.status === 'success') return { country: data.country, city: data.city, region: data.regionName, isp: data.isp, lat: data.lat, lon: data.lon, query: data.query };
+            if (api.includes('geoplugin')) return { country: data.geoplugin_countryName, city: data.geoplugin_city, region: data.geoplugin_region, isp: data.geoplugin_isp, lat: data.geoplugin_latitude, lon: data.geoplugin_longitude, query: data.geoplugin_request };
+        } catch(e) {}
+    }
+    throw new Error('All geolocation APIs failed');
+}
+
+let map = null, chart = null, markers = [];
+
+function updateMap(history) {
+    if (!map) {
+        map = L.map('map').setView([20,0], 2);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>' }).addTo(map);
+    }
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+    history.forEach(rec => {
+        if (rec.lat && rec.lon && !isNaN(rec.lat) && !isNaN(rec.lon)) {
+            let marker = L.marker([rec.lat, rec.lon]).addTo(map);
+            marker.bindPopup(`<b>${rec.city}, ${rec.country}</b><br>ISP: ${rec.isp}<br>Visited: ${rec.time}`);
+            markers.push(marker);
+        }
+    });
+    if (markers.length && history[0]?.lat) map.setView([history[0].lat, history[0].lon], 8);
+}
+
+function getWeekNumber(d) { let temp = new Date(d.valueOf()); temp.setHours(0,0,0,0); temp.setDate(temp.getDate()+3-(temp.getDay()+6)%7); let year = temp.getFullYear(); let week = Math.floor((temp - new Date(year,0,4)) / 86400000 / 7); return `${year}-${week+1}`; }
+function getChartData(range) {
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+    let visitsByDate = {};
+    history.forEach(rec => { let date = new Date(rec.timestamp).toISOString().split('T')[0]; visitsByDate[date] = (visitsByDate[date]||0)+1; });
+    let sortedDates = Object.keys(visitsByDate).sort();
+    if (range === 'daily') return { labels: sortedDates.slice(-30), data: sortedDates.slice(-30).map(d => visitsByDate[d]) };
+    else if (range === 'weekly') {
+        let weeks = {}; sortedDates.forEach(d => { let wk = getWeekNumber(new Date(d)); weeks[wk] = (weeks[wk]||0) + visitsByDate[d]; });
+        let weeksSorted = Object.keys(weeks).sort().slice(-12);
+        return { labels: weeksSorted.map(w => `Week ${w}`), data: weeksSorted.map(w => weeks[w]) };
+    } else {
+        let months = {}; sortedDates.forEach(d => { let ym = d.substring(0,7); months[ym] = (months[ym]||0) + visitsByDate[d]; });
+        let monthsSorted = Object.keys(months).sort().slice(-12);
+        return { labels: monthsSorted, data: monthsSorted.map(m => months[m]) };
+    }
+}
+function updateChart() {
+    let range = document.getElementById('chartRangeSelect').value;
+    let { labels, data } = getChartData(range);
+    if (chart) chart.destroy();
+    let ctx = document.getElementById('visitsChart').getContext('2d');
+    chart = new Chart(ctx, { type: 'line', data: { labels: labels, datasets: [{ label: 'Visits', data: data, borderColor: '#1f5e7e', fill: false, tension: 0.1 }] }, options: { responsive: true, maintainAspectRatio: true } });
+}
+
+function displayVisitorTable(history) {
+    const tbody = document.getElementById('visitorTableBody');
+    if (!history.length) { tbody.innerHTML = '<tr><td colspan="7">No visitors yet</td></tr>'; return; }
+    tbody.innerHTML = '';
+    history.forEach(r => {
+        let row = tbody.insertRow();
+        row.insertCell(0).innerText = r.time || new Date(r.timestamp).toLocaleTimeString();
+        row.insertCell(1).innerText = r.ipHash.substring(0,10)+'...';
+        row.insertCell(2).innerText = r.country;
+        row.insertCell(3).innerText = r.city;
+        row.insertCell(4).innerText = r.region;
+        row.insertCell(5).innerText = (r.isp||'').substring(0,30);
+        row.insertCell(6).innerText = (r.lat && r.lon) ? `${r.lat},${r.lon}` : '-';
+    });
+}
+
+async function trackVisitor() {
+    await updateTotalVisitors();
+    await updateDailyVisitors();
+    updateActiveUsers();
+    try {
+        const loc = await getLocationData();
+        const ipHash = await hashIP(loc.query);
+        const visitorRecord = {
+            timestamp: new Date().toISOString(),
+            time: new Date().toLocaleTimeString(),
+            ipHash: ipHash,
+            country: loc.country || 'Unknown',
+            city: loc.city || 'Unknown',
+            region: loc.region || 'Unknown',
+            isp: loc.isp || 'Unknown',
+            lat: loc.lat ? parseFloat(loc.lat) : null,
+            lon: loc.lon ? parseFloat(loc.lon) : null
+        };
+        document.getElementById('currentLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${loc.city}, ${loc.region}, ${loc.country} | ISP: ${loc.isp}`;
+        let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+        if (!sessionStorage.getItem('visitor_recorded')) {
+            history.unshift(visitorRecord);
+            if (history.length > 50) history.pop();
+            localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(history));
+            sessionStorage.setItem('visitor_recorded','true');
+        }
+        displayVisitorTable(history);
+        updateMap(history);
+        updateChart();
+    } catch(e) {
+        document.getElementById('currentLocation').innerHTML = `⚠️ Location detection failed: ${e.message}`;
+        let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+        displayVisitorTable(history);
+        updateMap(history);
+        updateChart();
+    }
+    document.getElementById('visitorTimestamp').innerText = `Updated: ${new Date().toLocaleTimeString()}`;
+}
+
+function loadVisitorHistory() {
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+    displayVisitorTable(history);
+    updateMap(history);
+    updateChart();
+}
+
+function exportCSV() {
+    if (currentUser?.role !== 'admin') return;
+    let history = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+    let headers = ['Time','IP Hash','Country','City','Region','ISP','Latitude','Longitude'];
+    let rows = history.map(r => [r.time, r.ipHash, r.country, r.city, r.region, r.isp, r.lat, r.lon]);
+    let csvContent = [headers, ...rows].map(row => row.map(cell => `"${cell}"`).join(',')).join('\n');
+    let blob = new Blob([csvContent], {type: 'text/csv'});
+    let a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `visitors_${new Date().toISOString()}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function clearHistory() {
+    if (currentUser?.role !== 'admin') return;
+    if(confirm('⚠️ Admin: Delete ALL visitor data? This cannot be undone.')) {
+        localStorage.removeItem(STORAGE_KEY_HISTORY);
+        localStorage.removeItem(STORAGE_KEY_TOTAL);
+        localStorage.removeItem(STORAGE_KEY_DAILY);
+        localStorage.removeItem(STORAGE_KEY_ACTIVE);
+        sessionStorage.clear();
+        window.location.reload();
+    }
+}
+
+async function testGSheetConnection() {
+    if (currentUser?.role !== 'admin') return;
+    const apiUrl = document.getElementById('gsheetApiUrl').value.trim();
+    if (!apiUrl) { alert('Enter your Google Sheets API URL'); return; }
+    localStorage.setItem('gsheet_api_url', apiUrl);
+    try {
+        const res = await fetch(`${apiUrl}?action=readUsers`, { mode: 'cors' });
+        const data = await res.json();
+        if (data.success) {
+            alert('Connected! User data synced.');
+            document.getElementById('gsheetStatus').innerText = 'Connected';
+        } else throw new Error('Invalid response');
+    } catch(e) {
+        alert('Connection failed: ' + e.message);
+    }
+}
+
+async function syncDataToGSheet() {
+    if (currentUser?.role !== 'admin') return;
+    const apiUrl = document.getElementById('gsheetApiUrl').value.trim();
+    if (!apiUrl) { alert('Enter API URL'); return; }
+    const visitors = JSON.parse(localStorage.getItem(STORAGE_KEY_HISTORY) || '[]');
+    const totalVisitors = localStorage.getItem(STORAGE_KEY_TOTAL) || '0';
+    const todayVisitors = (JSON.parse(localStorage.getItem(STORAGE_KEY_DAILY) || '{}')[getToday()] || '0');
+    const activeNow = document.getElementById('activeNow').innerText;
+    await fetch(apiUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'syncStats', totalVisitors, todayVisitors, activeNow }) });
+    for (let v of visitors.slice(0,20)) {
+        await fetch(apiUrl, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'addVisitor', ...v }) });
+    }
+    alert('Sync started (first 20 visitors). Check your Google Sheet.');
+}
+
+// ==================== FIXED SEO AUDIT FUNCTIONS WITH MULTI-PROXY FALLBACK ====================
+
+async function fetchViaProxy(url) {
+    // Multiple fallback proxies – if one fails, try the next
+    const proxies = [
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        `https://cors-anywhere.herokuapp.com/${url}`,
+        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+    ];
+    
+    for (const proxy of proxies) {
+        try {
+            console.log('Trying proxy:', proxy);
+            const response = await fetch(proxy);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            let html;
+            if (proxy.includes('allorigins')) {
+                const data = await response.json();
+                html = data.contents;
+            } else {
+                html = await response.text();
+            }
+            
+            if (html && html.length > 500) {
+                console.log('Proxy succeeded:', proxy);
+                return html;
+            }
+        } catch (e) {
+            console.warn('Proxy failed:', proxy, e);
+        }
+    }
+    throw new Error('All proxies failed – please check your internet or try a different website.');
+}
+
+function getSolutionQuery(result) {
+    const title = result.title.toLowerCase();
+    if (title.includes('missing title')) return 'how to add title tag seo';
+    if (title.includes('missing meta description')) return 'add meta description seo';
+    if (title.includes('title length')) return 'optimal title length google';
+    if (title.includes('no h1')) return 'importance of h1 heading seo';
+    if (title.includes('multiple h1')) return 'fix multiple h1 tags';
+    if (title.includes('missing alt')) return 'image alt attribute seo';
+    if (title.includes('missing viewport')) return 'viewport meta tag mobile responsive';
+    if (title.includes('not served over https')) return 'enable https ssl';
+    if (title.includes('robots noindex')) return 'robots meta noindex fix';
+    if (title.includes('missing lang')) return 'html lang attribute';
+    if (title.includes('low text content')) return 'increase word count seo';
+    if (title.includes('invalid doctype')) return 'html5 doctype declaration';
+    return `fix ${title}`;
+}
+
+function performAudit(doc, baseUrlForInfo = null) {
+    const results = [];
+
+    // 1. Title
+    const titleEl = doc.querySelector('title');
+    const titleText = titleEl ? titleEl.innerText.trim() : '';
+    if (!titleText) {
+        results.push({ status: 'fail', title: 'Missing <title>', desc: 'Every page must have a descriptive title tag.', recommendation: 'Add <title>Your Page Title</title> inside <head>. Ideal length: 30-60 characters.' });
+    } else {
+        const len = titleText.length;
+        if (len < 20 || len > 65) {
+            results.push({ status: 'warning', title: 'Title length suboptimal', desc: `Current length: ${len} chars.`, recommendation: 'Keep title between 30-60 characters for better SEO.' });
+        } else {
+            results.push({ status: 'pass', title: '✓ Title tag present', desc: `"${titleText.substring(0, 70)}" — length ${len} chars (good).` });
+        }
+    }
+
+    // 2. Meta description
+    let metaDesc = '';
+    const metaDescNodes = doc.querySelectorAll('meta[name="description"]');
+    if (metaDescNodes.length) metaDesc = metaDescNodes[0].getAttribute('content') || '';
+    if (!metaDesc || metaDesc.trim() === '') {
+        results.push({ status: 'fail', title: 'Missing meta description', desc: 'Meta description influences click‑through rate.', recommendation: 'Add <meta name="description" content="Compelling summary (120-160 chars)">' });
+    } else {
+        const descLen = metaDesc.trim().length;
+        if (descLen < 70 || descLen > 165) {
+            results.push({ status: 'warning', title: 'Meta description length', desc: `Current length: ${descLen} chars.`, recommendation: 'Best practice: 120–158 characters.' });
+        } else {
+            results.push({ status: 'pass', title: '✓ Meta description found', desc: `Length ${descLen} chars – within recommended range.` });
+        }
+    }
+
+    // 3. Heading structure
+    const h1s = doc.querySelectorAll('h1');
+    if (h1s.length === 0) {
+        results.push({ status: 'fail', title: 'No H1 heading', desc: 'H1 is the main heading, critical for structure.', recommendation: 'Include one descriptive H1 that reflects page content.' });
+    } else if (h1s.length > 1) {
+        results.push({ status: 'warning', title: 'Multiple H1 tags', desc: `Found ${h1s.length} H1s.`, recommendation: 'Use only one H1 per page.' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Single H1 present', desc: `H1: "${h1s[0].innerText.trim().substring(0, 60)}"` });
+    }
+    const h2s = doc.querySelectorAll('h2');
+    if (h1s.length === 1 && h2s.length === 0) {
+        results.push({ status: 'warning', title: 'No H2 subheadings', desc: 'H2s help structure content.', recommendation: 'Break content into sections using H2 headings.' });
+    } else if (h2s.length > 0) {
+        results.push({ status: 'pass', title: '✓ Headings structure', desc: `Found ${h2s.length} H2 elements (good for hierarchy).` });
+    }
+
+    // 4. Images alt
+    const imgs = doc.querySelectorAll('img');
+    let missingAlt = 0;
+    imgs.forEach(img => { if (img.getAttribute('alt') === null) missingAlt++; });
+    if (missingAlt > 0) {
+        results.push({ status: 'fail', title: `Missing alt attributes on ${missingAlt} image(s)`, desc: 'Alt text is essential for accessibility and SEO.', recommendation: 'Add descriptive alt attributes to all informative images.' });
+    } else if (imgs.length > 0) {
+        results.push({ status: 'pass', title: '✓ All images have alt attributes', desc: `Checked ${imgs.length} images.` });
+    } else {
+        results.push({ status: 'warning', title: 'No images found', desc: 'Images can improve engagement.', recommendation: 'Consider adding relevant images with alt text.' });
+    }
+
+    // 5. Viewport
+    const viewport = doc.querySelector('meta[name="viewport"]');
+    if (!viewport) {
+        results.push({ status: 'fail', title: 'Missing viewport meta tag', desc: 'Without viewport, mobile experience suffers.', recommendation: 'Add <meta name="viewport" content="width=device-width, initial-scale=1">' });
+    } else {
+        const content = viewport.getAttribute('content') || '';
+        if (content.includes('width=device-width') && content.includes('initial-scale')) {
+            results.push({ status: 'pass', title: '✓ Viewport configured', desc: 'Mobile responsive meta present.' });
+        } else {
+            results.push({ status: 'warning', title: 'Viewport not optimal', desc: `Current: "${content}"`, recommendation: 'Use "width=device-width, initial-scale=1"' });
+        }
+    }
+
+    // 6. HTTPS
+    if (baseUrlForInfo && baseUrlForInfo.startsWith('http')) {
+        const isHttps = baseUrlForInfo.toLowerCase().startsWith('https');
+        if (!isHttps) {
+            results.push({ status: 'fail', title: 'Not served over HTTPS', desc: 'HTTP pages are marked insecure by browsers.', recommendation: 'Install SSL certificate and redirect to HTTPS.' });
+        } else {
+            results.push({ status: 'pass', title: '✓ HTTPS enabled', desc: 'Secure connection, good for trust & ranking.' });
+        }
+    }
+
+    // 7. Robots meta
+    const robotsMeta = doc.querySelector('meta[name="robots"]');
+    if (robotsMeta) {
+        const content = robotsMeta.getAttribute('content') || '';
+        if (content.includes('noindex')) {
+            results.push({ status: 'warning', title: 'Robots meta contains noindex', desc: 'Page will not be indexed by search engines.', recommendation: 'Remove noindex if you want organic traffic.' });
+        } else if (content.includes('nofollow')) {
+            results.push({ status: 'warning', title: 'Robots meta has nofollow', desc: 'Links on this page won’t be followed.', recommendation: 'Use nofollow only for user-generated or sponsored links.' });
+        } else {
+            results.push({ status: 'pass', title: '✓ Robots meta allows indexing', desc: `Current: "${content || 'default'}"` });
+        }
+    } else {
+        results.push({ status: 'pass', title: '✓ Robots meta absent (default: index, follow)', desc: 'No explicit blocking, search engines can index normally.' });
+    }
+
+    // 8. Language attribute
+    const htmlTag = doc.querySelector('html');
+    const lang = htmlTag ? htmlTag.getAttribute('lang') : null;
+    if (!lang) {
+        results.push({ status: 'warning', title: 'Missing lang attribute on <html>', desc: 'Helps screen readers and search engines.', recommendation: 'Add lang="en" or appropriate language code.' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Language declared', desc: `lang="${lang}"` });
+    }
+
+    // 9. Content word count
+    const bodyText = doc.body ? doc.body.innerText.trim() : '';
+    const wordCount = bodyText.split(/\s+/).filter(w => w.length > 0).length;
+    if (wordCount < 300) {
+        results.push({ status: 'warning', title: 'Low text content', desc: `~${wordCount} words.`, recommendation: 'Add more unique, valuable content (aim for 300+ words for ranking potential).' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Substantial content', desc: `Approximately ${wordCount} words.` });
+    }
+
+    // 10. Doctype
+    const doctype = doc.doctype;
+    if (!doctype || doctype.name !== 'html') {
+        results.push({ status: 'warning', title: 'Missing or invalid DOCTYPE', desc: 'Standards mode is important.', recommendation: 'Start with <!DOCTYPE html>' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Valid DOCTYPE', desc: '<!DOCTYPE html> present.' });
+    }
+
+    return results;
+}
+
+function displayResults(results, sourceInfo) {
+    const resultsCard = document.getElementById('resultsCard');
+    const auditResultsDiv = document.getElementById('auditResults');
+    const auditTimestampSpan = document.getElementById('auditTimestamp');
+    
+    resultsCard.style.display = 'block';
+    auditResultsDiv.innerHTML = '';
+    
+    const now = new Date();
+    auditTimestampSpan.innerText = `Audit: ${now.toLocaleTimeString()} · ${sourceInfo}`;
+    
+    let passCount = 0, failCount = 0, warnCount = 0;
+    
+    results.forEach(r => {
+        if (r.status === 'pass') passCount++;
+        else if (r.status === 'fail') failCount++;
+        else if (r.status === 'warning') warnCount++;
+        
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `check-item ${r.status}`;
+        let icon = r.status === 'pass' ? '✅' : (r.status === 'fail' ? '❌' : '⚠️');
+        
+        let html = `
+            <div class="check-title">${icon} ${r.title}</div>
+            <div class="check-desc">${r.desc}</div>
+            <div class="recommend">💡 ${r.recommendation || 'Fix as suggested'}</div>
+        `;
+        
+        if (r.status === 'fail' || r.status === 'warning') {
+            const query = getSolutionQuery(r);
+            const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+            html += `<div><a href="${googleUrl}" target="_blank" class="solution-link">🔍 Search Google for solution</a></div>`;
+        }
+        
+        itemDiv.innerHTML = html;
+        auditResultsDiv.appendChild(itemDiv);
+    });
+    
+    const summaryDiv = document.createElement('div');
+    summaryDiv.style.marginTop = '1rem';
+    summaryDiv.style.padding = '0.8rem';
+    summaryDiv.style.background = '#eef2f7';
+    summaryDiv.style.borderRadius = '1rem';
+    summaryDiv.innerHTML = `<strong>📊 Summary:</strong> ✅ ${passCount} passed &nbsp;| ⚠️ ${warnCount} warnings &nbsp;| ❌ ${failCount} critical issues`;
+    auditResultsDiv.appendChild(summaryDiv);
+    
+    resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Override the SEO audit button event listener with indicators
+const auditBtn = document.getElementById('runAuditBtn');
+if (auditBtn) {
+    const newAuditBtn = auditBtn.cloneNode(true);
+    auditBtn.parentNode.replaceChild(newAuditBtn, auditBtn);
+    
+    newAuditBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        const urlInput = document.getElementById('targetUrl');
+        let rawUrl = urlInput.value.trim();
+        
+        if (!rawUrl) {
+            alert('Please enter a URL (e.g., https://example.com)');
+            return;
+        }
+        
+        if (!rawUrl.startsWith('http://') && !rawUrl.startsWith('https://')) {
+            rawUrl = 'https://' + rawUrl;
+        }
+        
+        const resultsCard = document.getElementById('resultsCard');
+        const auditResultsDiv = document.getElementById('auditResults');
+        
+        resultsCard.style.display = 'block';
+        auditResultsDiv.innerHTML = `
+            <div style="text-align: center; padding: 2rem;">
+                <div class="spinner" style="margin: 0 auto 1rem auto;"></div>
+                <p>🌐 Fetching website from <strong>${escapeHtml(rawUrl)}</strong>...</p>
+                <p style="font-size: 0.8rem; color: #666;">This may take 5–10 seconds depending on the site and proxy availability.</p>
+            </div>
+        `;
+        document.getElementById('pagespeedCard').style.display = 'none';
+        
+        try {
+            console.log('Starting audit for:', rawUrl);
+            const htmlString = await fetchViaProxy(rawUrl);
+            console.log('HTML received, length:', htmlString.length);
+            
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(htmlString, 'text/html');
+            
+            if (!doc.body || doc.body.innerText.trim().length < 10) {
+                throw new Error('Page appears empty or blocked by the server.');
+            }
+            
+            const auditResults = performAudit(doc, rawUrl);
+            displayResults(auditResults, `🌍 ${rawUrl}`);
+            
+        } catch (err) {
+            console.error('Audit error:', err);
+            auditResultsDiv.innerHTML = `
+                <div class="error-msg" style="background:#ffe8e6; border-left-color:#e85d04; padding:1rem; border-radius:1rem;">
+                    <strong>❌ Audit failed</strong><br>
+                    ${escapeHtml(err.message)}<br><br>
+                    💡 Suggestions:<br>
+                    • Try a different website URL.<br>
+                    • Switch to "Audit HTML Code" mode (paste the HTML directly).<br>
+                    • Check your internet connection.<br>
+                    • Some websites block automated requests.
+                </div>
+            `;
+        }
+    });
+}
+
+function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+// --- HTML audit (works without proxy) ---
+document.getElementById('runHtmlAuditBtn').addEventListener('click', function() {
+    let rawHtml = document.getElementById('htmlCodeInput').value.trim();
+    if (!rawHtml) { alert('Paste HTML code'); return; }
+    try {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(rawHtml, 'text/html');
+        const auditResults = performAudit(doc, null);
+        displayResults(auditResults, '📄 Pasted HTML');
+        document.getElementById('pagespeedCard').style.display = 'none';
+    } catch (err) {
+        document.getElementById('auditResults').innerHTML = `<div class="error-msg">Error parsing HTML: ${err.message}</div>`;
+        document.getElementById('resultsCard').style.display = 'block';
+    }
+});
+
+// --- PageSpeed (unchanged) ---
+async function runPagespeed() {
+    let url = document.getElementById('targetUrl').value.trim();
+    if (!url) { alert('Enter URL'); return; }
+    if (!url.startsWith('http')) url = 'https://' + url;
+    const key = document.getElementById('apiKeyInput').value.trim();
+    if (!key) { alert('Enter PageSpeed API key'); return; }
+    const psCard = document.getElementById('pagespeedCard');
+    const psResults = document.getElementById('pagespeedResults');
+    const psTimestamp = document.getElementById('psTimestamp');
+    psCard.style.display = 'block';
+    psResults.innerHTML = '<div class="error-msg">⏳ Running PageSpeed analysis (10-20 sec)...</div>';
+    psTimestamp.innerText = `Fetching...`;
+    try {
+        const apiUrl = `https://pagespeedonline.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&key=${key}&strategy=mobile&category=performance&category=accessibility&category=best-practices&category=seo`;
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error((await response.json()).error?.message || `HTTP ${response.status}`);
+        const data = await response.json();
+        psTimestamp.innerText = `PageSpeed: ${new Date().toLocaleTimeString()} · ${url}`;
+        const lighthouse = data.lighthouseResult;
+        const categories = lighthouse.categories;
+        const audits = lighthouse.audits;
+        const scores = {
+            performance: (categories.performance?.score || 0) * 100,
+            accessibility: (categories.accessibility?.score || 0) * 100,
+            bestPractices: (categories['best-practices']?.score || 0) * 100,
+            seo: (categories.seo?.score || 0) * 100
+        };
+        const lcp = audits['largest-contentful-paint']?.displayValue || 'N/A';
+        const fid = audits['max-potential-fid']?.displayValue || 'N/A';
+        const cls = audits['cumulative-layout-shift']?.displayValue || 'N/A';
+        const lcpRating = audits['largest-contentful-paint']?.score === 1 ? '✅ Good' : (audits['largest-contentful-paint']?.score === 0 ? '❌ Poor' : '⚠️ Needs Improvement');
+        const clsRating = audits['cumulative-layout-shift']?.score === 1 ? '✅ Good' : (audits['cumulative-layout-shift']?.score === 0 ? '❌ Poor' : '⚠️ Needs Improvement');
+        let opportunities = '';
+        if (audits['render-blocking-resources'] && audits['render-blocking-resources'].details?.items) opportunities += `<li>⚡ Eliminate render-blocking resources: ${audits['render-blocking-resources'].displayValue || 'fix'}</li>`;
+        if (audits['unused-css-rules'] && audits['unused-css-rules'].details?.items) opportunities += `<li>🎨 Reduce unused CSS: ${audits['unused-css-rules'].displayValue || 'see details'}</li>`;
+        if (audits['unused-javascript'] && audits['unused-javascript'].details?.items) opportunities += `<li>📦 Reduce unused JavaScript: ${audits['unused-javascript'].displayValue || 'see details'}</li>`;
+        if (audits['modern-image-formats'] && audits['modern-image-formats'].score === 0) opportunities += `<li>🖼️ Serve images in modern formats (WebP, AVIF)</li>`;
+        if (!opportunities) opportunities = '<li>✅ No major performance opportunities detected.</li>';
+        const html = `
+            <div class="pagespeed-scores">
+                <div class="score-card"><div class="score-number ${scores.performance >= 90 ? 'good' : (scores.performance >= 50 ? 'average' : 'poor')}">${Math.round(scores.performance)}</div><div class="score-label">Performance</div></div>
+                <div class="score-card"><div class="score-number ${scores.accessibility >= 90 ? 'good' : (scores.accessibility >= 50 ? 'average' : 'poor')}">${Math.round(scores.accessibility)}</div><div class="score-label">Accessibility</div></div>
+                <div class="score-card"><div class="score-number ${scores.bestPractices >= 90 ? 'good' : (scores.bestPractices >= 50 ? 'average' : 'poor')}">${Math.round(scores.bestPractices)}</div><div class="score-label">Best Practices</div></div>
+                <div class="score-card"><div class="score-number ${scores.seo >= 90 ? 'good' : (scores.seo >= 50 ? 'average' : 'poor')}">${Math.round(scores.seo)}</div><div class="score-label">SEO</div></div>
+            </div>
+            <div class="check-item pass"><div class="check-title">📊 Core Web Vitals (mobile)</div>
+            <div>LCP: ${lcp} ${lcpRating}</div><div>FID: ${fid}</div><div>CLS: ${cls} ${clsRating}</div></div>
+            <div class="check-item warning"><div class="check-title">🔧 Top opportunities</div><ul>${opportunities}</ul>
+            <div class="recommend">💡 Full report: <a href="https://pagespeed.web.dev/report?url=${encodeURIComponent(url)}" target="_blank">View on PageSpeed Insights</a></div></div>
+        `;
+        psResults.innerHTML = html;
+    } catch (err) {
+        psResults.innerHTML = `<div class="error-msg">❌ PageSpeed API error: ${err.message}</div>`;
+    }
+}
+document.getElementById('runPagespeedBtn').addEventListener('click', runPagespeed);
+
+// --- Persistence & UI helpers (keep existing) ---
+const STORAGE_KEYS = { API_KEY:'user_api_key', TARGET_URL:'user_target_url', HTML_CODE:'user_html_code', ACTIVE_MODE:'user_active_mode', CHART_RANGE:'user_chart_range', THEME:'theme', ACCENT:'accent' };
+function saveInputs() {
+    localStorage.setItem(STORAGE_KEYS.API_KEY, document.getElementById('apiKeyInput').value);
+    localStorage.setItem(STORAGE_KEYS.TARGET_URL, document.getElementById('targetUrl').value);
+    localStorage.setItem(STORAGE_KEYS.HTML_CODE, document.getElementById('htmlCodeInput').value);
+    localStorage.setItem(STORAGE_KEYS.CHART_RANGE, document.getElementById('chartRangeSelect').value);
+    localStorage.setItem(STORAGE_KEYS.ACTIVE_MODE, currentMode);
+}
+function loadInputs() {
+    if (localStorage.getItem(STORAGE_KEYS.API_KEY)) document.getElementById('apiKeyInput').value = localStorage.getItem(STORAGE_KEYS.API_KEY);
+    if (localStorage.getItem(STORAGE_KEYS.TARGET_URL)) document.getElementById('targetUrl').value = localStorage.getItem(STORAGE_KEYS.TARGET_URL);
+    if (localStorage.getItem(STORAGE_KEYS.HTML_CODE)) document.getElementById('htmlCodeInput').value = localStorage.getItem(STORAGE_KEYS.HTML_CODE);
+    if (localStorage.getItem(STORAGE_KEYS.CHART_RANGE)) document.getElementById('chartRangeSelect').value = localStorage.getItem(STORAGE_KEYS.CHART_RANGE);
+    if (localStorage.getItem(STORAGE_KEYS.ACTIVE_MODE) === 'html') setMode('html');
+    else setMode('url');
+    if (localStorage.getItem('gsheet_api_url')) document.getElementById('gsheetApiUrl').value = localStorage.getItem('gsheet_api_url');
+}
+let currentMode = 'url';
+function setMode(mode) {
+    currentMode = mode;
+    document.getElementById('urlSection').style.display = mode === 'url' ? 'block' : 'none';
+    document.getElementById('htmlSection').style.display = mode === 'html' ? 'block' : 'none';
+    document.getElementById('modeUrlBtn').classList.toggle('active', mode === 'url');
+    document.getElementById('modeHtmlBtn').classList.toggle('active', mode === 'html');
+    saveInputs();
+}
+function setTheme(theme) { document.body.classList.toggle('dark', theme === 'dark'); localStorage.setItem(STORAGE_KEYS.THEME, theme); }
+function setAccent(color) { document.documentElement.style.setProperty('--accent', color); localStorage.setItem(STORAGE_KEYS.ACCENT, color); }
+
+function showUserMgmt() {
+    if (currentUser.role !== 'admin') return;
+    const modal = document.getElementById('userMgmtModal');
+    modal.style.display = 'flex';
+    renderUserList();
+}
+function renderUserList() {
+    const container = document.getElementById('usersList');
+    container.innerHTML = '<h4>Existing Users</h4>';
+    users.forEach(u => {
+        const div = document.createElement('div');
+        div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.marginBottom = '0.5rem';
+        div.innerHTML = `<span><b>${u.username}</b> (${u.role}) ${u.consent ? '✅ consent' : '⚠️ no consent'}</span>`;
+        if (u.username !== 'admin') {
+            const delBtn = document.createElement('button');
+            delBtn.innerText = 'Delete';
+            delBtn.style.background = '#b91c1c'; delBtn.style.padding = '0.2rem 0.8rem';
+            delBtn.onclick = async () => {
+                await deleteUser(u.username);
+                renderUserList();
+            };
+            div.appendChild(delBtn);
+        }
+        container.appendChild(div);
+    });
+}
+
+function showLoginHistory() {
+    if (currentUser?.role !== 'admin') return;
+    const history = getLoginHistory();
+    const container = document.getElementById('loginHistoryList');
+    if (history.length === 0) {
+        container.innerHTML = '<p>No login records yet.</p>';
+    } else {
+        let html = '<table style="width:100%; border-collapse:collapse;"><tr><th>Time</th><th>Username</th><th>IP (hash)</th><th>Browser / OS</th></tr>';
+        history.forEach(entry => {
+            html += `<tr><td>${new Date(entry.timestamp).toLocaleString()}</td><td>${escapeHtml(entry.username)}</td><td>${entry.ipHash.substring(0,10)}...</td><td>${escapeHtml(entry.userAgent || '')}</td></tr>`;
+        });
+        html += '</table>';
+        container.innerHTML = html;
+    }
+    document.getElementById('loginHistoryModal').style.display = 'flex';
+}
+
+// --- Event listeners for modals and buttons ---
+document.getElementById('loginBtn').onclick = async () => {
+    await loadUsers();
+    if (authenticate(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value)) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+        updateUIForRole();
+        trackVisitor();
+        loadVisitorHistory();
+        loadInputs();
+    } else document.getElementById('loginMessage').innerText = 'Invalid credentials';
+};
+document.getElementById('showSignupBtn').onclick = () => {
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('signupPanel').style.display = 'block';
+};
+document.getElementById('backToLoginBtn').onclick = () => {
+    document.getElementById('signupPanel').style.display = 'none';
+    document.getElementById('loginPanel').style.display = 'block';
+};
+document.getElementById('signupBtn').onclick = async () => {
+    let uname = document.getElementById('signupUsername').value.trim();
+    let pwd = document.getElementById('signupPassword').value.trim();
+    let consent = document.getElementById('consentCheckbox').checked;
+    if (!uname || !pwd) { document.getElementById('signupMessage').innerText = 'Fill all fields'; return; }
+    if (!consent) { document.getElementById('signupMessage').innerText = 'You must accept the privacy consent to register.'; return; }
+    await loadUsers();
+    if (await addUser(uname, pwd, 'viewer', true)) {
+        document.getElementById('signupMessage').innerText = 'Account created! Please login.';
+        setTimeout(() => {
+            document.getElementById('signupPanel').style.display = 'none';
+            document.getElementById('loginPanel').style.display = 'block';
+            document.getElementById('signupUsername').value = '';
+            document.getElementById('signupPassword').value = '';
+            document.getElementById('consentCheckbox').checked = false;
+        }, 1500);
+    } else document.getElementById('signupMessage').innerText = 'Username exists';
+};
+document.getElementById('logoutBtn').onclick = logout;
+document.getElementById('manageUsersBtn').onclick = showUserMgmt;
+document.getElementById('viewLoginHistoryBtn').onclick = showLoginHistory;
+document.getElementById('closeUserMgmtBtn').onclick = () => document.getElementById('userMgmtModal').style.display = 'none';
+document.getElementById('closeHistoryModalBtn').onclick = () => document.getElementById('loginHistoryModal').style.display = 'none';
+document.getElementById('addUserBtn').onclick = async () => {
+    let uname = document.getElementById('newUsername').value.trim();
+    let pwd = document.getElementById('newPassword').value.trim();
+    let role = document.getElementById('newRole').value;
+    if (!uname || !pwd) { alert('Fill fields'); return; }
+    if (await addUser(uname, pwd, role, true)) { renderUserList(); document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = ''; }
+    else alert('User exists');
+};
+document.getElementById('exportCsvBtn').onclick = exportCSV;
+document.getElementById('clearHistoryBtn').onclick = clearHistory;
+document.getElementById('testGSheetBtn').onclick = testGSheetConnection;
+document.getElementById('syncToGSheetBtn').onclick = syncDataToGSheet;
+document.getElementById('lightThemeBtn').onclick = () => setTheme('light');
+document.getElementById('darkThemeBtn').onclick = () => setTheme('dark');
+document.getElementById('accentColorPicker').onchange = e => setAccent(e.target.value);
+document.getElementById('modeUrlBtn').onclick = () => setMode('url');
+document.getElementById('modeHtmlBtn').onclick = () => setMode('html');
+document.getElementById('chartRangeSelect').onchange = () => { saveInputs(); updateChart(); };
+document.getElementById('apiKeyInput').oninput = saveInputs;
+document.getElementById('targetUrl').oninput = saveInputs;
+document.getElementById('htmlCodeInput').oninput = saveInputs;
+document.getElementById('gsheetApiUrl').oninput = () => localStorage.setItem('gsheet_api_url', document.getElementById('gsheetApiUrl').value);
+
+// --- Initialization ---
+window.addEventListener('DOMContentLoaded', async () => {
+    await loadUsers();
+    if (!checkExistingLogin()) document.getElementById('loginOverlay').style.display = 'flex';
+    else { trackVisitor(); setInterval(() => updateActiveUsers(), 30000); }
+    if (localStorage.getItem(STORAGE_KEYS.THEME)) setTheme(localStorage.getItem(STORAGE_KEYS.THEME));
+    if (localStorage.getItem(STORAGE_KEYS.ACCENT)) setAccent(localStorage.getItem(STORAGE_KEYS.ACCENT));
+});
+</script>
+</body>
+</html>
