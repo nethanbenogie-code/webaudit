@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SEO Dashboard | Multi‑User + Admin Panel</title>
+    <title>SEO Dashboard | Forgot Password + Security Q&A</title>
     <!-- Leaflet CSS/JS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -110,11 +110,11 @@
         .login-box {
             text-align: center;
         }
-        .login-box input, .login-box .checkbox-group {
+        .login-box input, .login-box .checkbox-group, .login-box select {
             width: 100%;
             margin: 0.8rem 0;
         }
-        .login-box input {
+        .login-box input, .login-box select {
             padding: 0.8rem;
             border-radius: 2rem;
             border: 1px solid var(--border-color);
@@ -139,6 +139,16 @@
             animation: spin 1s ease-in-out infinite;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .forgot-link {
+            display: block;
+            text-align: right;
+            font-size: 0.75rem;
+            margin-top: -0.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+            cursor: pointer;
+            text-decoration: underline;
+        }
         @media (max-width: 700px) {
             body { padding: 1rem; }
             .card { padding: 1.2rem; }
@@ -159,6 +169,7 @@
                     <p style="margin-bottom:1rem;">Login to access your dashboard</p>
                     <input type="text" id="loginUsername" placeholder="Username">
                     <input type="password" id="loginPassword" placeholder="Password">
+                    <div class="forgot-link" id="forgotPasswordLink">Forgot Password?</div>
                     <button id="loginBtn" style="width:100%; margin-top:1rem;">Login</button>
                     <button id="showSignupBtn" style="background:#ccc; width:100%; margin-top:0.5rem;">Create Account</button>
                     <div id="loginMessage" style="margin-top:1rem; color:red; font-size:0.8rem;"></div>
@@ -170,6 +181,8 @@
                     <p style="margin-bottom:1rem;">Join to track your website's SEO & visitors</p>
                     <input type="text" id="signupUsername" placeholder="Username">
                     <input type="password" id="signupPassword" placeholder="Password">
+                    <input type="text" id="securityQuestion" placeholder="Security Question (e.g., What is your pet's name?)">
+                    <input type="text" id="securityAnswer" placeholder="Answer">
                     <div class="checkbox-group">
                         <input type="checkbox" id="consentCheckbox">
                         <label for="consentCheckbox">I consent to login tracking (timestamp, hashed IP, browser info) for platform analytics only. This data is never sold to third parties.</label>
@@ -196,6 +209,19 @@
             </ul>
             <div class="badge" style="margin-top:1rem;">🔐 Your data never leaves your browser unless you connect Google Sheets.</div>
         </div>
+    </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div id="forgotModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center;">
+    <div style="background:white; border-radius:2rem; padding:2rem; max-width:400px; width:90%;">
+        <h3>Reset Password</h3>
+        <input type="text" id="resetUsername" placeholder="Username" style="width:100%; margin:1rem 0; padding:0.8rem; border-radius:2rem; border:1px solid #ccc;">
+        <input type="text" id="resetAnswer" placeholder="Security Answer" style="width:100%; margin:1rem 0; padding:0.8rem; border-radius:2rem; border:1px solid #ccc;">
+        <input type="password" id="newPassword" placeholder="New Password" style="width:100%; margin:1rem 0; padding:0.8rem; border-radius:2rem; border:1px solid #ccc;">
+        <button id="resetPasswordBtn" style="width:100%; margin-top:1rem;">Reset Password</button>
+        <button id="closeForgotBtn" style="background:#ccc; width:100%; margin-top:0.5rem;">Cancel</button>
+        <div id="resetMessage" style="margin-top:1rem; color:red; font-size:0.8rem;"></div>
     </div>
 </div>
 
@@ -325,7 +351,7 @@
 </div>
 
 <script>
-// ========================= USER MANAGEMENT & CONSENT =========================
+// ========================= USER MANAGEMENT & FORGOT PASSWORD =========================
 let currentUser = null;
 let users = [];
 
@@ -380,7 +406,7 @@ async function loadUsers() {
     }
     const local = localStorage.getItem('dashboard_users');
     if (local) users = JSON.parse(local);
-    if (!users.length) users = [{ username: 'admin', password: 'admin123', role: 'admin', consent: true }];
+    if (!users.length) users = [{ username: 'admin', password: 'admin123', role: 'admin', consent: true, question: 'What is the default admin password?', answer: 'admin123' }];
     saveUsersToLocal();
 }
 
@@ -401,9 +427,9 @@ async function saveUsersToSheet() {
     } catch(e) { console.warn("Could not sync users to sheet"); }
 }
 
-async function addUser(username, password, role, consent = true) {
+async function addUser(username, password, role, consent, question, answer) {
     if (users.find(u => u.username === username)) return false;
-    users.push({ username, password, role, consent });
+    users.push({ username, password, role, consent, question, answer });
     saveUsersToLocal();
     await saveUsersToSheet();
     return true;
@@ -425,6 +451,30 @@ async function updateUserConsent(username, consent) {
         await saveUsersToSheet();
         if (currentUser && currentUser.username === username) currentUser.consent = consent;
     }
+}
+
+async function updateUserPassword(username, newPassword) {
+    const user = users.find(u => u.username === username);
+    if (user) {
+        user.password = newPassword;
+        saveUsersToLocal();
+        await saveUsersToSheet();
+        return true;
+    }
+    return false;
+}
+
+function getUserSecurityQuestion(username) {
+    const user = users.find(u => u.username === username);
+    return user ? { question: user.question, answer: user.answer } : null;
+}
+
+function verifySecurityAnswer(username, answer) {
+    const user = users.find(u => u.username === username);
+    if (user && user.answer && user.answer.toLowerCase() === answer.toLowerCase()) {
+        return true;
+    }
+    return false;
 }
 
 async function authenticate(username, password) {
@@ -723,22 +773,18 @@ async function syncDataToGSheet() {
     alert('Sync started (first 20 visitors). Check your Google Sheet.');
 }
 
-// ==================== FIXED SEO AUDIT FUNCTIONS WITH MULTI-PROXY FALLBACK ====================
-
+// ==================== SEO AUDIT FUNCTIONS (with multi-proxy) ====================
 async function fetchViaProxy(url) {
-    // Multiple fallback proxies – if one fails, try the next
     const proxies = [
         `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
         `https://cors-anywhere.herokuapp.com/${url}`,
         `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
     ];
-    
     for (const proxy of proxies) {
         try {
             console.log('Trying proxy:', proxy);
             const response = await fetch(proxy);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
             let html;
             if (proxy.includes('allorigins')) {
                 const data = await response.json();
@@ -746,7 +792,6 @@ async function fetchViaProxy(url) {
             } else {
                 html = await response.text();
             }
-            
             if (html && html.length > 500) {
                 console.log('Proxy succeeded:', proxy);
                 return html;
@@ -951,7 +996,7 @@ function displayResults(results, sourceInfo) {
     resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// Override the SEO audit button event listener with indicators
+// Override SEO audit button
 const auditBtn = document.getElementById('runAuditBtn');
 if (auditBtn) {
     const newAuditBtn = auditBtn.cloneNode(true);
@@ -1019,7 +1064,7 @@ if (auditBtn) {
 
 function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-// --- HTML audit (works without proxy) ---
+// HTML audit
 document.getElementById('runHtmlAuditBtn').addEventListener('click', function() {
     let rawHtml = document.getElementById('htmlCodeInput').value.trim();
     if (!rawHtml) { alert('Paste HTML code'); return; }
@@ -1035,7 +1080,7 @@ document.getElementById('runHtmlAuditBtn').addEventListener('click', function() 
     }
 });
 
-// --- PageSpeed (unchanged) ---
+// PageSpeed
 async function runPagespeed() {
     let url = document.getElementById('targetUrl').value.trim();
     if (!url) { alert('Enter URL'); return; }
@@ -1093,7 +1138,7 @@ async function runPagespeed() {
 }
 document.getElementById('runPagespeedBtn').addEventListener('click', runPagespeed);
 
-// --- Persistence & UI helpers (keep existing) ---
+// --- Persistence & UI helpers ---
 const STORAGE_KEYS = { API_KEY:'user_api_key', TARGET_URL:'user_target_url', HTML_CODE:'user_html_code', ACTIVE_MODE:'user_active_mode', CHART_RANGE:'user_chart_range', THEME:'theme', ACCENT:'accent' };
 function saveInputs() {
     localStorage.setItem(STORAGE_KEYS.API_KEY, document.getElementById('apiKeyInput').value);
@@ -1167,7 +1212,41 @@ function showLoginHistory() {
     document.getElementById('loginHistoryModal').style.display = 'flex';
 }
 
-// --- Event listeners for modals and buttons ---
+// --- Forgot Password flow ---
+document.getElementById('forgotPasswordLink').addEventListener('click', () => {
+    document.getElementById('forgotModal').style.display = 'flex';
+    document.getElementById('resetUsername').value = '';
+    document.getElementById('resetAnswer').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('resetMessage').innerText = '';
+});
+document.getElementById('closeForgotBtn').addEventListener('click', () => {
+    document.getElementById('forgotModal').style.display = 'none';
+});
+document.getElementById('resetPasswordBtn').addEventListener('click', async () => {
+    const username = document.getElementById('resetUsername').value.trim();
+    const answer = document.getElementById('resetAnswer').value.trim();
+    const newPass = document.getElementById('newPassword').value.trim();
+    if (!username || !answer || !newPass) {
+        document.getElementById('resetMessage').innerText = 'All fields required.';
+        return;
+    }
+    if (!verifySecurityAnswer(username, answer)) {
+        document.getElementById('resetMessage').innerText = 'Invalid username or security answer.';
+        return;
+    }
+    const success = await updateUserPassword(username, newPass);
+    if (success) {
+        document.getElementById('resetMessage').innerHTML = '<span style="color:green;">Password reset successful! You can now login.</span>';
+        setTimeout(() => {
+            document.getElementById('forgotModal').style.display = 'none';
+        }, 2000);
+    } else {
+        document.getElementById('resetMessage').innerText = 'Error resetting password.';
+    }
+});
+
+// --- Event listeners for login/signup/modal buttons ---
 document.getElementById('loginBtn').onclick = async () => {
     await loadUsers();
     if (authenticate(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value)) {
@@ -1190,17 +1269,24 @@ document.getElementById('backToLoginBtn').onclick = () => {
 document.getElementById('signupBtn').onclick = async () => {
     let uname = document.getElementById('signupUsername').value.trim();
     let pwd = document.getElementById('signupPassword').value.trim();
+    let question = document.getElementById('securityQuestion').value.trim();
+    let answer = document.getElementById('securityAnswer').value.trim();
     let consent = document.getElementById('consentCheckbox').checked;
-    if (!uname || !pwd) { document.getElementById('signupMessage').innerText = 'Fill all fields'; return; }
+    if (!uname || !pwd || !question || !answer) {
+        document.getElementById('signupMessage').innerText = 'All fields required (username, password, security Q&A).';
+        return;
+    }
     if (!consent) { document.getElementById('signupMessage').innerText = 'You must accept the privacy consent to register.'; return; }
     await loadUsers();
-    if (await addUser(uname, pwd, 'viewer', true)) {
+    if (await addUser(uname, pwd, 'viewer', true, question, answer)) {
         document.getElementById('signupMessage').innerText = 'Account created! Please login.';
         setTimeout(() => {
             document.getElementById('signupPanel').style.display = 'none';
             document.getElementById('loginPanel').style.display = 'block';
             document.getElementById('signupUsername').value = '';
             document.getElementById('signupPassword').value = '';
+            document.getElementById('securityQuestion').value = '';
+            document.getElementById('securityAnswer').value = '';
             document.getElementById('consentCheckbox').checked = false;
         }, 1500);
     } else document.getElementById('signupMessage').innerText = 'Username exists';
@@ -1215,8 +1301,14 @@ document.getElementById('addUserBtn').onclick = async () => {
     let pwd = document.getElementById('newPassword').value.trim();
     let role = document.getElementById('newRole').value;
     if (!uname || !pwd) { alert('Fill fields'); return; }
-    if (await addUser(uname, pwd, role, true)) { renderUserList(); document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = ''; }
-    else alert('User exists');
+    // For admin-created users, we set default security Q&A (can be changed later)
+    const defaultQuestion = 'What is your security answer?';
+    const defaultAnswer = 'default';
+    if (await addUser(uname, pwd, role, true, defaultQuestion, defaultAnswer)) {
+        renderUserList();
+        document.getElementById('newUsername').value = '';
+        document.getElementById('newPassword').value = '';
+    } else alert('User exists');
 };
 document.getElementById('exportCsvBtn').onclick = exportCSV;
 document.getElementById('clearHistoryBtn').onclick = clearHistory;
