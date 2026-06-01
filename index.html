@@ -39,7 +39,6 @@
             --shadow-lg: 0 20px 40px -12px rgba(0,0,0,0.5);
         }
         
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
@@ -57,7 +56,6 @@
 
         .container { max-width: 1400px; margin: 0 auto; }
         
-        /* Typography */
         h1 { 
             font-size: 2.5rem; 
             font-weight: 800; 
@@ -70,7 +68,6 @@
         }
         .subhead { color: var(--text-secondary); margin-bottom: 2.5rem; border-left: 4px solid var(--accent); padding-left: 1rem; font-weight: 500; font-size: 1.1rem; }
         
-        /* Grid Layout */
         .dashboard-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
@@ -79,7 +76,6 @@
         }
         .full-width { grid-column: 1 / -1; }
 
-        /* Cards */
         .card { 
             background: var(--card-bg); 
             backdrop-filter: blur(12px); 
@@ -93,7 +89,6 @@
         }
         .card:hover { transform: translateY(-3px); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.2); }
         
-        /* Animations */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -104,8 +99,6 @@
 
         .score-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); font-size: 1.2rem; }
         
-        /* Inputs & Buttons */
-        .input-group { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; align-items: center; }
         input, textarea, select { 
             flex: 1; 
             padding: 0.9rem 1.2rem; 
@@ -144,13 +137,10 @@
         button:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.2); }
         button:active { transform: translateY(0); }
         
-        /* Modifiers */
-        .mode-selector, .style-toolbar { display: flex; gap: 0.8rem; flex-wrap: wrap; }
         .mode-btn, .style-btn { background: var(--border-color); color: var(--text-primary); box-shadow: none; border-radius: 2rem; }
         .mode-btn.active, .style-btn.active { background: var(--accent); color: white; }
         .badge { background: var(--border-color); padding: 0.35rem 1rem; border-radius: 2rem; font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
         
-        /* Dashboard Stats & Cards */
         .pagespeed-scores, .visitor-stats { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1.5rem 0; }
         .score-card, .stat-card { 
             flex: 1; 
@@ -170,7 +160,6 @@
         
         .good { color: var(--success); } .average { color: var(--warning); } .poor { color: var(--danger); }
         
-        /* Checklists */
         .checklist { display: flex; flex-direction: column; gap: 1rem; }
         .check-item { background: rgba(255,255,255,0.3); border-radius: 1rem; padding: 1.2rem; border-left: 6px solid #ccc; transition: all 0.2s; border: 1px solid var(--border-color); border-left-width: 6px; }
         body.dark .check-item { background: rgba(0,0,0,0.2); }
@@ -182,14 +171,12 @@
         .solution-link { margin-top: 12px; display: inline-flex; gap: 6px; background: var(--border-color); padding: 6px 16px; border-radius: 2rem; font-size: 0.85rem; text-decoration: none; color: var(--text-primary); font-weight: 600; transition: background 0.2s; }
         .solution-link:hover { background: var(--accent); color: white; }
 
-        /* Map & Tables */
         #map { height: 450px; border-radius: 1.2rem; margin: 1.5rem 0; z-index: 1; border: 1px solid var(--border-color); box-shadow: inset 0 2px 10px rgba(0,0,0,0.05); }
         .table-container { max-height: 400px; overflow-y: auto; border-radius: 1rem; border: 1px solid var(--border-color); background: var(--card-bg); }
         .location-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.9rem; }
         .location-table th { background: var(--border-color); padding: 12px 15px; text-align: left; position: sticky; top: 0; z-index: 10; font-weight: 600; color: var(--text-primary); }
         .location-table td { padding: 12px 15px; text-align: left; border-bottom: 1px solid var(--border-color); }
         .location-table tr:last-child td { border-bottom: none; }
-        .location-table tbody tr { transition: background 0.2s; }
         .location-table tbody tr:hover { background: rgba(0,0,0,0.03); }
         body.dark .location-table tbody tr:hover { background: rgba(255,255,255,0.05); }
 
@@ -200,7 +187,6 @@
         .admin-only { display: none; }
         .admin-bar { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; align-items: center; }
         
-        /* Login Overhaul */
         .login-overlay { background: rgba(0,0,0,0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); }
         .login-wrapper {
             display: flex;
@@ -242,7 +228,6 @@
         .forgot-link { display: block; text-align: right; font-size: 0.85rem; margin-top: -0.2rem; margin-bottom: 1rem; color: var(--accent); cursor: pointer; font-weight: 500; transition: color 0.2s; }
         .forgot-link:hover { color: var(--accent-hover); text-decoration: underline; }
         
-        /* Modal Polish */
         .modal-content { background: var(--card-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--card-border); border-radius: 2rem; padding: 2.5rem; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px rgba(0,0,0,0.3); animation: fadeInUp 0.4s ease-out; color: var(--text-primary); }
 
         @media (max-width: 900px) {
@@ -444,7 +429,7 @@
             <div class="table-container">
                 <table class="location-table" id="visitorTable">
                     <thead><tr><th>Timestamp</th><th>IP Hash</th><th>Country</th><th>City</th><th>Region</th><th>Network ISP</th><th>Coordinates</th></tr></thead>
-                    <tbody id="visitorTableBody"><tr><td colspan="7" style="text-align:center; padding: 2rem;">Awaiting visitor data...</td></tr></tbody>
+                    <tbody id="visitorTableBody"><tr><td colspan="7" style="text-align:center; padding: 2rem;">Awaiting visitor data...</td></tr</tbody>
                 </table>
             </div>
         </div>
@@ -785,7 +770,6 @@ function updateChart() {
     if (chart) chart.destroy();
     let ctx = document.getElementById('visitsChart').getContext('2d');
     
-    // Dynamic color handling for charts
     const rootStyle = getComputedStyle(document.documentElement);
     const accentColor = rootStyle.getPropertyValue('--accent').trim() || '#1f5e7e';
     const textColor = rootStyle.getPropertyValue('--text-primary').trim() || '#1a2c3e';
@@ -799,14 +783,14 @@ function updateChart() {
                 label: 'Visits', 
                 data: data, 
                 borderColor: accentColor,
-                backgroundColor: accentColor + '20', // Add transparency
+                backgroundColor: accentColor + '20',
                 borderWidth: 3,
                 pointBackgroundColor: accentColor,
                 pointBorderColor: '#fff',
                 pointRadius: 4,
                 pointHoverRadius: 6,
                 fill: true, 
-                tension: 0.4 // Smooth curves
+                tension: 0.4
             }] 
         }, 
         options: { 
@@ -830,12 +814,10 @@ function displayVisitorTable(history) {
     history.forEach(r => {
         let row = tbody.insertRow();
         row.insertCell(0).innerText = r.time || new Date(r.timestamp).toLocaleTimeString();
-        
         let hashCell = row.insertCell(1);
         hashCell.innerText = r.ipHash ? r.ipHash.substring(0,10)+'...' : 'Unknown';
         hashCell.style.fontFamily = 'monospace';
         hashCell.style.color = 'var(--text-secondary)';
-
         row.insertCell(2).innerHTML = `<strong>${r.country || '-'}</strong>`;
         row.insertCell(3).innerText = r.city || '-';
         row.insertCell(4).innerText = r.region || '-';
@@ -957,30 +939,7 @@ async function syncDataToGSheet() {
     }
 }
 
-// ==================== SEO AUDIT FUNCTIONS ====================
-async function fetchViaProxy(url) {
-    const proxies = [
-        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-        `https://cors-anywhere.herokuapp.com/${url}`,
-        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
-    ];
-    for (const proxy of proxies) {
-        try {
-            const response = await fetch(proxy);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            let html;
-            if (proxy.includes('allorigins')) {
-                const data = await response.json();
-                html = data.contents;
-            } else {
-                html = await response.text();
-            }
-            if (html && html.length > 500) return html;
-        } catch (e) { console.warn('Proxy skipped:', proxy); }
-    }
-    throw new Error('All free CORS proxies exhausted. Target server rejected automated requests. Try "Raw HTML" mode.');
-}
-
+// ==================== ENHANCED SEO AUDIT FUNCTIONS ====================
 function getSolutionQuery(result) {
     const title = result.title.toLowerCase();
     if (title.includes('missing title')) return 'how to add title tag seo';
@@ -991,17 +950,29 @@ function getSolutionQuery(result) {
     if (title.includes('missing alt')) return 'image alt attribute seo';
     if (title.includes('missing viewport')) return 'viewport meta tag mobile responsive';
     if (title.includes('not served over https')) return 'enable https ssl';
-    if (title.includes('robots noindex')) return 'robots meta noindex fix';
-    if (title.includes('missing lang')) return 'html lang attribute';
-    if (title.includes('low text content')) return 'increase word count seo';
-    if (title.includes('invalid doctype')) return 'html5 doctype declaration';
+    if (title.includes('robots')) return 'robots meta tag seo best practices';
+    if (title.includes('canonical')) return 'canonical url tag seo';
+    if (title.includes('lang attribute')) return 'html lang attribute for seo';
+    if (title.includes('doctype')) return 'html5 doctype declaration';
+    if (title.includes('word count')) return 'how many words per page for seo';
+    if (title.includes('structured data')) return 'json ld structured data seo';
+    if (title.includes('open graph')) return 'open graph meta tags for social sharing';
+    if (title.includes('twitter card')) return 'twitter card meta tags';
+    if (title.includes('favicon')) return 'favicon seo best practices';
+    if (title.includes('internal links')) return 'internal linking strategy seo';
+    if (title.includes('empty href')) return 'empty href links seo impact';
     return `fix ${title}`;
+}
+
+function getWordCount(doc) {
+    const bodyText = doc.body?.innerText || '';
+    return bodyText.trim().split(/\s+/).filter(w => w.length > 0).length;
 }
 
 function performAudit(doc, baseUrlForInfo = null) {
     const results = [];
 
-    // Title
+    // ----- EXISTING CHECKS (unchanged) -----
     const titleEl = doc.querySelector('title');
     const titleText = titleEl ? titleEl.innerText.trim() : '';
     if (!titleText) { results.push({ status: 'fail', title: 'Missing <title>', desc: 'Every page must have a descriptive title tag.', recommendation: 'Add <title>Your Page Title</title> inside <head>.' });
@@ -1011,7 +982,6 @@ function performAudit(doc, baseUrlForInfo = null) {
         else results.push({ status: 'pass', title: '✓ Title tag optimized', desc: `"${titleText.substring(0, 70)}" — length ${len} chars.` });
     }
 
-    // Meta Description
     let metaDesc = '';
     const metaDescNodes = doc.querySelectorAll('meta[name="description"]');
     if (metaDescNodes.length) metaDesc = metaDescNodes[0].getAttribute('content') || '';
@@ -1022,7 +992,6 @@ function performAudit(doc, baseUrlForInfo = null) {
         else results.push({ status: 'pass', title: '✓ Meta description found', desc: `Length ${descLen} chars – optimal.` });
     }
 
-    // Headings
     const h1s = doc.querySelectorAll('h1');
     if (h1s.length === 0) results.push({ status: 'fail', title: 'No H1 heading found', desc: 'H1 indicates main structural topic.', recommendation: 'Include exactly one descriptive H1.' });
     else if (h1s.length > 1) results.push({ status: 'warning', title: 'Multiple H1 tags detected', desc: `Found ${h1s.length} H1s.`, recommendation: 'Consolidate to a single H1 per page.' });
@@ -1032,14 +1001,12 @@ function performAudit(doc, baseUrlForInfo = null) {
     if (h1s.length === 1 && h2s.length === 0) results.push({ status: 'warning', title: 'No H2 subheadings', desc: 'Content lacks deep sectioning.', recommendation: 'Break text into scannable H2 sections.' });
     else if (h2s.length > 0) results.push({ status: 'pass', title: '✓ Heading hierarchy', desc: `Found ${h2s.length} H2 elements structuring the document.` });
 
-    // Images
     const imgs = doc.querySelectorAll('img');
     let missingAlt = 0;
     imgs.forEach(img => { if (img.getAttribute('alt') === null) missingAlt++; });
     if (missingAlt > 0) results.push({ status: 'fail', title: `Missing alt attributes on ${missingAlt} image(s)`, desc: 'Accessibility and image SEO penalty.', recommendation: 'Inject descriptive alt attributes to all content images.' });
     else if (imgs.length > 0) results.push({ status: 'pass', title: '✓ Complete image accessibility', desc: `Audited ${imgs.length} images with valid alt text.` });
 
-    // Viewport & HTTPS & Misc
     const viewport = doc.querySelector('meta[name="viewport"]');
     if (!viewport) results.push({ status: 'fail', title: 'Missing mobile viewport tag', desc: 'Page will not scale correctly on phones.', recommendation: 'Add <meta name="viewport" content="width=device-width, initial-scale=1">' });
     else results.push({ status: 'pass', title: '✓ Viewport configured', desc: 'Mobile scaling enabled.' });
@@ -1047,6 +1014,125 @@ function performAudit(doc, baseUrlForInfo = null) {
     if (baseUrlForInfo && baseUrlForInfo.startsWith('http')) {
         if (!baseUrlForInfo.toLowerCase().startsWith('https')) results.push({ status: 'fail', title: 'Insecure HTTP Protocol', desc: 'Data transmitted in cleartext.', recommendation: 'Force HTTPS redirect via server config.' });
         else results.push({ status: 'pass', title: '✓ HTTPS secure channel', desc: 'Traffic is encrypted.' });
+    }
+
+    // ---------- NEW ADVANCED SEO CHECKS ----------
+    // 1. Robots meta tag
+    const robots = doc.querySelector('meta[name="robots"]');
+    if (!robots) {
+        results.push({ status: 'warning', title: 'Robots meta tag missing', desc: 'Search engines use default index, follow.', recommendation: 'Add <meta name="robots" content="index, follow"> to control crawling.' });
+    } else {
+        const content = robots.getAttribute('content') || '';
+        if (content.includes('noindex')) results.push({ status: 'fail', title: 'Robots noindex detected', desc: 'Page is excluded from search indexes.', recommendation: 'Remove "noindex" directive unless intentional.' });
+        else results.push({ status: 'pass', title: '✓ Robots meta correctly set', desc: `Content: ${content}` });
+    }
+
+    // 2. Canonical URL
+    const canonical = doc.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+        results.push({ status: 'warning', title: 'Canonical tag missing', desc: 'Search engines may treat duplicate content as separate.', recommendation: 'Define <link rel="canonical" href="https://example.com/page"> to consolidate signals.' });
+    } else {
+        const href = canonical.getAttribute('href');
+        if (href && href.trim() !== '') results.push({ status: 'pass', title: '✓ Canonical URL present', desc: `Points to ${href.substring(0, 80)}` });
+        else results.push({ status: 'fail', title: 'Canonical tag empty', desc: 'Empty href attribute.', recommendation: 'Provide a full URL to the preferred version.' });
+    }
+
+    // 3. Lang attribute on <html>
+    const htmlTag = doc.documentElement;
+    const lang = htmlTag.getAttribute('lang');
+    if (!lang || lang.trim() === '') {
+        results.push({ status: 'fail', title: 'Missing lang attribute on <html>', desc: 'Accessibility and language targeting issue.', recommendation: 'Add lang="en" (or appropriate language code) to <html> tag.' });
+    } else {
+        results.push({ status: 'pass', title: '✓ HTML lang attribute set', desc: `Language: ${lang}` });
+    }
+
+    // 4. Doctype check
+    const doctype = doc.doctype;
+    if (!doctype || doctype.name !== 'html') {
+        results.push({ status: 'warning', title: 'Invalid or missing HTML5 doctype', desc: 'May trigger quirks mode and inconsistent rendering.', recommendation: 'Start document with <!DOCTYPE html>' });
+    } else {
+        results.push({ status: 'pass', title: '✓ HTML5 doctype declared', desc: 'Standards mode enforced.' });
+    }
+
+    // 5. Word count
+    const wordCount = getWordCount(doc);
+    if (wordCount < 100) {
+        results.push({ status: 'fail', title: `Very low text content (${wordCount} words)`, desc: 'Thin content hurts rankings.', recommendation: 'Expand content to at least 300 words per page.' });
+    } else if (wordCount < 300) {
+        results.push({ status: 'warning', title: `Moderate word count (${wordCount} words)`, desc: 'May lack depth for competitive topics.', recommendation: 'Increase to 500+ words for better topical authority.' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Sufficient text content', desc: `Detected ${wordCount} words – good depth.` });
+    }
+
+    // 6. Structured data (JSON-LD)
+    const jsonLd = doc.querySelectorAll('script[type="application/ld+json"]');
+    if (jsonLd.length === 0) {
+        results.push({ status: 'warning', title: 'No structured data (JSON-LD) found', desc: 'Rich snippets missing from SERPs.', recommendation: 'Implement schema.org markup (e.g., Article, Product, LocalBusiness).' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Structured data present', desc: `Found ${jsonLd.length} JSON-LD blocks.` });
+    }
+
+    // 7. Open Graph tags
+    const ogTitle = doc.querySelector('meta[property="og:title"]');
+    const ogDesc = doc.querySelector('meta[property="og:description"]');
+    const ogImage = doc.querySelector('meta[property="og:image"]');
+    let missingOG = [];
+    if (!ogTitle) missingOG.push('og:title');
+    if (!ogDesc) missingOG.push('og:description');
+    if (!ogImage) missingOG.push('og:image');
+    if (missingOG.length > 0) {
+        results.push({ status: 'warning', title: `Missing Open Graph tags: ${missingOG.join(', ')}`, desc: 'Social sharing loses control over title, image, description.', recommendation: 'Add relevant OG meta tags for better link previews on Facebook/LinkedIn.' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Core Open Graph tags present', desc: 'Social sharing enhanced.' });
+    }
+
+    // 8. Twitter Cards
+    const twitterCard = doc.querySelector('meta[name="twitter:card"]');
+    const twitterTitle = doc.querySelector('meta[name="twitter:title"]');
+    if (!twitterCard || !twitterTitle) {
+        results.push({ status: 'warning', title: 'Incomplete Twitter Card meta', desc: 'Poor appearance when shared on X (Twitter).', recommendation: 'Add twitter:card, twitter:title, twitter:description, twitter:image.' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Twitter Cards configured', desc: 'Card type: ' + (twitterCard.getAttribute('content') || 'summary') });
+    }
+
+    // 9. Favicon
+    const favicon = doc.querySelector('link[rel~="icon"], link[rel="shortcut icon"]');
+    if (!favicon) {
+        results.push({ status: 'warning', title: 'Favicon missing', desc: 'Browser tabs show default icon, brand recognition reduced.', recommendation: 'Add <link rel="icon" type="image/x-icon" href="/favicon.ico">' });
+    } else {
+        results.push({ status: 'pass', title: '✓ Favicon detected', desc: 'Improves user experience and brand identity.' });
+    }
+
+    // 10. Internal vs external links (if baseUrl provided)
+    if (baseUrlForInfo) {
+        const links = doc.querySelectorAll('a[href]');
+        let internalCount = 0, externalCount = 0;
+        let emptyHrefCount = 0;
+        try {
+            const baseOrigin = new URL(baseUrlForInfo).origin;
+            links.forEach(link => {
+                const href = link.getAttribute('href');
+                if (!href || href.trim() === '' || href === '#' || href === 'javascript:void(0)') {
+                    emptyHrefCount++;
+                    return;
+                }
+                try {
+                    const absolute = new URL(href, baseUrlForInfo);
+                    if (absolute.origin === baseOrigin) internalCount++;
+                    else externalCount++;
+                } catch(e) { /* invalid URL, ignore */ }
+            });
+        } catch(e) { /* ignore URL parsing errors */ }
+        
+        if (internalCount === 0 && links.length > 0) {
+            results.push({ status: 'warning', title: 'No internal links found', desc: `Total ${links.length} links, all external or invalid.`, recommendation: 'Add internal links to help distribute page authority and improve crawl depth.' });
+        } else if (internalCount > 0) {
+            results.push({ status: 'pass', title: 'Internal linking structure', desc: `${internalCount} internal / ${externalCount} external links. Good for SEO.` });
+        }
+        
+        if (emptyHrefCount > 0) {
+            results.push({ status: 'warning', title: `${emptyHrefCount} empty or javascript:void(0) links`, desc: 'These links provide no navigation value and may harm crawl efficiency.', recommendation: 'Use proper URLs or remove empty links.' });
+        }
     }
 
     return results;
@@ -1098,13 +1184,34 @@ function displayResults(results, sourceInfo) {
     summaryDiv.style.border = '1px solid var(--border-color)';
     summaryDiv.innerHTML = `<strong style="font-size:1.1rem;"><i class="fas fa-chart-pie"></i> Executive Summary:</strong> &nbsp;&nbsp; <span style="color:var(--success); font-weight:700;">${passCount} Passes</span> &nbsp;|&nbsp; <span style="color:var(--warning); font-weight:700;">${warnCount} Warnings</span> &nbsp;|&nbsp; <span style="color:var(--danger); font-weight:700;">${failCount} Critical</span>`;
     
-    document.body.classList.contains('dark') ? summaryDiv.style.background = 'rgba(255,255,255,0.05)' : null;
-
+    if (document.body.classList.contains('dark')) summaryDiv.style.background = 'rgba(255,255,255,0.05)';
     auditResultsDiv.appendChild(summaryDiv);
     resultsCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-// Override SEO audit button
+async function fetchViaProxy(url) {
+    const proxies = [
+        `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        `https://cors-anywhere.herokuapp.com/${url}`,
+        `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`
+    ];
+    for (const proxy of proxies) {
+        try {
+            const response = await fetch(proxy);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            let html;
+            if (proxy.includes('allorigins')) {
+                const data = await response.json();
+                html = data.contents;
+            } else {
+                html = await response.text();
+            }
+            if (html && html.length > 500) return html;
+        } catch (e) { console.warn('Proxy skipped:', proxy); }
+    }
+    throw new Error('All free CORS proxies exhausted. Target server rejected automated requests. Try "Raw HTML" mode.');
+}
+
 const auditBtn = document.getElementById('runAuditBtn');
 if (auditBtn) {
     const newAuditBtn = auditBtn.cloneNode(true);
@@ -1153,7 +1260,6 @@ if (auditBtn) {
 
 function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
 
-// HTML audit
 document.getElementById('runHtmlAuditBtn').addEventListener('click', function() {
     let rawHtml = document.getElementById('htmlCodeInput').value.trim();
     if (!rawHtml) { alert('Paste source code payload first.'); return; }
@@ -1169,7 +1275,7 @@ document.getElementById('runHtmlAuditBtn').addEventListener('click', function() 
     }
 });
 
-// PageSpeed
+// PageSpeed (unchanged)
 async function runPagespeed() {
     let url = document.getElementById('targetUrl').value.trim();
     if (!url) { alert('Specify a valid target URL.'); return; }
@@ -1289,7 +1395,6 @@ function setMode(mode) {
     saveInputs();
 }
 
-// UI Theme application
 function applyThemeEngine(theme, accentColor) {
     document.body.classList.toggle('dark', theme === 'dark');
     document.getElementById('lightThemeBtn').classList.toggle('active', theme !== 'dark');
@@ -1298,8 +1403,6 @@ function applyThemeEngine(theme, accentColor) {
     if (accentColor) {
         document.documentElement.style.setProperty('--accent', accentColor);
         document.getElementById('accentColorPicker').value = accentColor;
-        
-        // Derive hover color dynamically by tweaking opacity or known hardcoded values for simplicity
         let hoverColor = accentColor;
         if(accentColor === '#1f5e7e') hoverColor = '#0f425b';
         if(accentColor === '#2b9348') hoverColor = '#1e7135';
@@ -1307,8 +1410,6 @@ function applyThemeEngine(theme, accentColor) {
         if(accentColor === '#8b5cf6') hoverColor = '#6d28d9';
         document.documentElement.style.setProperty('--accent-hover', hoverColor);
     }
-    
-    // Refresh chart if it exists to apply new colors
     if (chart) updateChart();
 }
 
@@ -1334,7 +1435,7 @@ function renderUserList() {
         const div = document.createElement('div');
         div.style.display = 'flex'; div.style.justifyContent = 'space-between'; div.style.alignItems = 'center'; div.style.marginBottom = '0.8rem';
         div.style.background = 'rgba(0,0,0,0.03)'; div.style.padding = '0.8rem'; div.style.borderRadius = '0.8rem';
-        document.body.classList.contains('dark') ? div.style.background = 'rgba(255,255,255,0.05)' : null;
+        if (document.body.classList.contains('dark')) div.style.background = 'rgba(255,255,255,0.05)';
         
         div.innerHTML = `<span><strong style="font-size:1.1rem; color:var(--accent);">${u.username}</strong> <span style="background:var(--border-color); padding:2px 8px; border-radius:10px; font-size:0.8rem; margin-left:8px;">${u.role}</span><br><span style="font-size:0.85rem; color:var(--text-secondary);">${u.consent ? '<i class="fas fa-check-circle" style="color:var(--success);"></i> Privacy Accepted' : '<i class="fas fa-times-circle" style="color:var(--warning);"></i> Pending Privacy Consent'}</span></span>`;
         if (u.username !== 'admin') {
@@ -1358,7 +1459,7 @@ function showLoginHistory() {
     if (history.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding: 2rem;">No login records found in local storage.</p>';
     } else {
-        let html = '<table class="location-table"><tr><th>Timestamp</th><th>Identity</th><th>Network Hash</th><th>Client Origin</th></tr>';
+        let html = '<table class="location-table"><td><th>Timestamp</th><th>Identity</th><th>Network Hash</th><th>Client Origin</th></tr>';
         history.forEach(entry => {
             html += `<tr>
                 <td style="white-space:nowrap;">${new Date(entry.timestamp).toLocaleString()}</td>
@@ -1373,7 +1474,7 @@ function showLoginHistory() {
     document.getElementById('loginHistoryModal').style.display = 'flex';
 }
 
-// --- Forgot Password flow ---
+// Forgot password flow (unchanged)
 document.getElementById('forgotPasswordLink').addEventListener('click', () => {
     document.getElementById('forgotModal').style.display = 'flex';
     document.getElementById('resetUsername').value = '';
@@ -1407,15 +1508,12 @@ document.getElementById('resetPasswordBtn').addEventListener('click', async () =
     }
 });
 
-// --- Event listeners for login/signup/modal buttons ---
+// Event listeners
 document.getElementById('loginBtn').onclick = async () => {
     await loadUsers();
-    
-    // Add visual feedback to button
     const btn = document.getElementById('loginBtn');
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
-    
     if (await authenticate(document.getElementById('loginUsername').value, document.getElementById('loginPassword').value)) {
         setTimeout(() => {
             document.getElementById('loginOverlay').style.display = 'none';
@@ -1425,7 +1523,7 @@ document.getElementById('loginBtn').onclick = async () => {
             loadVisitorHistory();
             loadInputs();
             btn.innerHTML = originalText;
-        }, 500); // Small artificial delay for visual smoothness
+        }, 500);
     } else {
         document.getElementById('loginMessage').innerHTML = '<i class="fas fa-exclamation-triangle"></i> Invalid credentials or unauthorized access attempt.';
         btn.innerHTML = originalText;
@@ -1478,7 +1576,6 @@ document.getElementById('addUserBtn').onclick = async () => {
     let pwd = document.getElementById('addUserPassword').value.trim();
     let role = document.getElementById('newRole').value;
     if (!uname || !pwd) { alert('Identity and passphrase required.'); return; }
-    
     const defaultQuestion = 'What is your security answer?';
     const defaultAnswer = 'default';
     if (await addUser(uname, pwd, role, true, defaultQuestion, defaultAnswer)) {
@@ -1502,14 +1599,10 @@ document.getElementById('targetUrl').oninput = saveInputs;
 document.getElementById('htmlCodeInput').oninput = saveInputs;
 document.getElementById('gsheetApiUrl').oninput = () => localStorage.setItem('gsheet_api_url', document.getElementById('gsheetApiUrl').value);
 
-// --- Initialization ---
 window.addEventListener('DOMContentLoaded', async () => {
-    
-    // Boot sequence UI checks
     const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME) || 'light';
     const savedAccent = localStorage.getItem(STORAGE_KEYS.ACCENT) || '#1f5e7e';
     applyThemeEngine(savedTheme, savedAccent);
-
     await loadUsers();
     if (!checkExistingLogin()) {
         document.getElementById('loginOverlay').style.display = 'flex';
