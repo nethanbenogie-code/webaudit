@@ -429,7 +429,7 @@
             <div class="table-container">
                 <table class="location-table" id="visitorTable">
                     <thead><tr><th>Timestamp</th><th>IP Hash</th><th>Country</th><th>City</th><th>Region</th><th>Network ISP</th><th>Coordinates</th></tr></thead>
-                    <tbody id="visitorTableBody"><tr><td colspan="7" style="text-align:center; padding: 2rem;">Awaiting visitor data...</td></tr</tbody>
+                    <tbody id="visitorTableBody"><tr><td colspan="7" style="text-align:center; padding: 2rem;">Awaiting visitor data...</tr</tbody>
                 </table>
             </div>
         </div>
@@ -809,7 +809,7 @@ function updateChart() {
 
 function displayVisitorTable(history) {
     const tbody = document.getElementById('visitorTableBody');
-    if (!history.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">No visitors recorded yet</td></tr>'; return; }
+    if (!history.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding: 2rem;">No visitors recorded yet</tr</tr'; return; }
     tbody.innerHTML = '';
     history.forEach(r => {
         let row = tbody.insertRow();
@@ -939,28 +939,39 @@ async function syncDataToGSheet() {
     }
 }
 
-// ==================== ENHANCED SEO AUDIT FUNCTIONS ====================
+// ==================== ENHANCED SEO AUDIT FUNCTIONS (ALL CHECKS) ====================
 function getSolutionQuery(result) {
     const title = result.title.toLowerCase();
-    if (title.includes('missing title')) return 'how to add title tag seo';
-    if (title.includes('missing meta description')) return 'add meta description seo';
-    if (title.includes('title length')) return 'optimal title length google';
-    if (title.includes('no h1')) return 'importance of h1 heading seo';
-    if (title.includes('multiple h1')) return 'fix multiple h1 tags';
-    if (title.includes('missing alt')) return 'image alt attribute seo';
-    if (title.includes('missing viewport')) return 'viewport meta tag mobile responsive';
-    if (title.includes('not served over https')) return 'enable https ssl';
-    if (title.includes('robots')) return 'robots meta tag seo best practices';
-    if (title.includes('canonical')) return 'canonical url tag seo';
-    if (title.includes('lang attribute')) return 'html lang attribute for seo';
-    if (title.includes('doctype')) return 'html5 doctype declaration';
-    if (title.includes('word count')) return 'how many words per page for seo';
-    if (title.includes('structured data')) return 'json ld structured data seo';
-    if (title.includes('open graph')) return 'open graph meta tags for social sharing';
-    if (title.includes('twitter card')) return 'twitter card meta tags';
-    if (title.includes('favicon')) return 'favicon seo best practices';
-    if (title.includes('internal links')) return 'internal linking strategy seo';
-    if (title.includes('empty href')) return 'empty href links seo impact';
+    const mapping = {
+        'missing title': 'how to add title tag seo',
+        'missing meta description': 'add meta description seo',
+        'title length': 'optimal title length google',
+        'no h1': 'importance of h1 heading seo',
+        'multiple h1': 'fix multiple h1 tags',
+        'missing alt': 'image alt attribute seo',
+        'missing viewport': 'viewport meta tag mobile responsive',
+        'not served over https': 'enable https ssl',
+        'robots': 'robots meta tag seo best practices',
+        'canonical': 'canonical url tag seo',
+        'lang attribute': 'html lang attribute for seo',
+        'doctype': 'html5 doctype declaration',
+        'word count': 'how many words per page for seo',
+        'structured data': 'json ld structured data seo',
+        'open graph': 'open graph meta tags for social sharing',
+        'twitter card': 'twitter card meta tags',
+        'favicon': 'favicon seo best practices',
+        'internal links': 'internal linking strategy seo',
+        'empty href': 'empty href links seo impact',
+        'hreflang': 'hreflang tag implementation multilingual seo',
+        'external links are dofollow': 'nofollow external links seo best practice',
+        'heading levels skipped': 'proper heading hierarchy seo accessibility',
+        'meta keywords tag is obsolete': 'meta keywords seo obsolete',
+        'title and h1 are very different': 'title tag vs h1 heading alignment seo',
+        'alt text length': 'image alt text best practices length'
+    };
+    for (let [key, query] of Object.entries(mapping)) {
+        if (title.includes(key)) return query;
+    }
     return `fix ${title}`;
 }
 
@@ -972,7 +983,7 @@ function getWordCount(doc) {
 function performAudit(doc, baseUrlForInfo = null) {
     const results = [];
 
-    // ----- EXISTING CHECKS (unchanged) -----
+    // ----- 1. Title tag
     const titleEl = doc.querySelector('title');
     const titleText = titleEl ? titleEl.innerText.trim() : '';
     if (!titleText) { results.push({ status: 'fail', title: 'Missing <title>', desc: 'Every page must have a descriptive title tag.', recommendation: 'Add <title>Your Page Title</title> inside <head>.' });
@@ -982,6 +993,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         else results.push({ status: 'pass', title: '✓ Title tag optimized', desc: `"${titleText.substring(0, 70)}" — length ${len} chars.` });
     }
 
+    // ----- 2. Meta description
     let metaDesc = '';
     const metaDescNodes = doc.querySelectorAll('meta[name="description"]');
     if (metaDescNodes.length) metaDesc = metaDescNodes[0].getAttribute('content') || '';
@@ -992,32 +1004,36 @@ function performAudit(doc, baseUrlForInfo = null) {
         else results.push({ status: 'pass', title: '✓ Meta description found', desc: `Length ${descLen} chars – optimal.` });
     }
 
+    // ----- 3. H1
     const h1s = doc.querySelectorAll('h1');
     if (h1s.length === 0) results.push({ status: 'fail', title: 'No H1 heading found', desc: 'H1 indicates main structural topic.', recommendation: 'Include exactly one descriptive H1.' });
     else if (h1s.length > 1) results.push({ status: 'warning', title: 'Multiple H1 tags detected', desc: `Found ${h1s.length} H1s.`, recommendation: 'Consolidate to a single H1 per page.' });
     else results.push({ status: 'pass', title: '✓ Structural H1 present', desc: `H1: "${h1s[0].innerText.trim().substring(0, 60)}"` });
     
+    // ----- 4. H2
     const h2s = doc.querySelectorAll('h2');
     if (h1s.length === 1 && h2s.length === 0) results.push({ status: 'warning', title: 'No H2 subheadings', desc: 'Content lacks deep sectioning.', recommendation: 'Break text into scannable H2 sections.' });
     else if (h2s.length > 0) results.push({ status: 'pass', title: '✓ Heading hierarchy', desc: `Found ${h2s.length} H2 elements structuring the document.` });
 
+    // ----- 5. Image alt attributes
     const imgs = doc.querySelectorAll('img');
     let missingAlt = 0;
     imgs.forEach(img => { if (img.getAttribute('alt') === null) missingAlt++; });
     if (missingAlt > 0) results.push({ status: 'fail', title: `Missing alt attributes on ${missingAlt} image(s)`, desc: 'Accessibility and image SEO penalty.', recommendation: 'Inject descriptive alt attributes to all content images.' });
     else if (imgs.length > 0) results.push({ status: 'pass', title: '✓ Complete image accessibility', desc: `Audited ${imgs.length} images with valid alt text.` });
 
+    // ----- 6. Viewport
     const viewport = doc.querySelector('meta[name="viewport"]');
     if (!viewport) results.push({ status: 'fail', title: 'Missing mobile viewport tag', desc: 'Page will not scale correctly on phones.', recommendation: 'Add <meta name="viewport" content="width=device-width, initial-scale=1">' });
     else results.push({ status: 'pass', title: '✓ Viewport configured', desc: 'Mobile scaling enabled.' });
 
+    // ----- 7. HTTPS (if URL provided)
     if (baseUrlForInfo && baseUrlForInfo.startsWith('http')) {
         if (!baseUrlForInfo.toLowerCase().startsWith('https')) results.push({ status: 'fail', title: 'Insecure HTTP Protocol', desc: 'Data transmitted in cleartext.', recommendation: 'Force HTTPS redirect via server config.' });
         else results.push({ status: 'pass', title: '✓ HTTPS secure channel', desc: 'Traffic is encrypted.' });
     }
 
-    // ---------- NEW ADVANCED SEO CHECKS ----------
-    // 1. Robots meta tag
+    // ----- 8. Robots meta
     const robots = doc.querySelector('meta[name="robots"]');
     if (!robots) {
         results.push({ status: 'warning', title: 'Robots meta tag missing', desc: 'Search engines use default index, follow.', recommendation: 'Add <meta name="robots" content="index, follow"> to control crawling.' });
@@ -1027,7 +1043,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         else results.push({ status: 'pass', title: '✓ Robots meta correctly set', desc: `Content: ${content}` });
     }
 
-    // 2. Canonical URL
+    // ----- 9. Canonical
     const canonical = doc.querySelector('link[rel="canonical"]');
     if (!canonical) {
         results.push({ status: 'warning', title: 'Canonical tag missing', desc: 'Search engines may treat duplicate content as separate.', recommendation: 'Define <link rel="canonical" href="https://example.com/page"> to consolidate signals.' });
@@ -1037,7 +1053,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         else results.push({ status: 'fail', title: 'Canonical tag empty', desc: 'Empty href attribute.', recommendation: 'Provide a full URL to the preferred version.' });
     }
 
-    // 3. Lang attribute on <html>
+    // ----- 10. Lang attribute
     const htmlTag = doc.documentElement;
     const lang = htmlTag.getAttribute('lang');
     if (!lang || lang.trim() === '') {
@@ -1046,7 +1062,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         results.push({ status: 'pass', title: '✓ HTML lang attribute set', desc: `Language: ${lang}` });
     }
 
-    // 4. Doctype check
+    // ----- 11. Doctype
     const doctype = doc.doctype;
     if (!doctype || doctype.name !== 'html') {
         results.push({ status: 'warning', title: 'Invalid or missing HTML5 doctype', desc: 'May trigger quirks mode and inconsistent rendering.', recommendation: 'Start document with <!DOCTYPE html>' });
@@ -1054,7 +1070,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         results.push({ status: 'pass', title: '✓ HTML5 doctype declared', desc: 'Standards mode enforced.' });
     }
 
-    // 5. Word count
+    // ----- 12. Word count
     const wordCount = getWordCount(doc);
     if (wordCount < 100) {
         results.push({ status: 'fail', title: `Very low text content (${wordCount} words)`, desc: 'Thin content hurts rankings.', recommendation: 'Expand content to at least 300 words per page.' });
@@ -1064,7 +1080,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         results.push({ status: 'pass', title: '✓ Sufficient text content', desc: `Detected ${wordCount} words – good depth.` });
     }
 
-    // 6. Structured data (JSON-LD)
+    // ----- 13. Structured data (JSON-LD)
     const jsonLd = doc.querySelectorAll('script[type="application/ld+json"]');
     if (jsonLd.length === 0) {
         results.push({ status: 'warning', title: 'No structured data (JSON-LD) found', desc: 'Rich snippets missing from SERPs.', recommendation: 'Implement schema.org markup (e.g., Article, Product, LocalBusiness).' });
@@ -1072,7 +1088,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         results.push({ status: 'pass', title: '✓ Structured data present', desc: `Found ${jsonLd.length} JSON-LD blocks.` });
     }
 
-    // 7. Open Graph tags
+    // ----- 14. Open Graph
     const ogTitle = doc.querySelector('meta[property="og:title"]');
     const ogDesc = doc.querySelector('meta[property="og:description"]');
     const ogImage = doc.querySelector('meta[property="og:image"]');
@@ -1086,7 +1102,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         results.push({ status: 'pass', title: '✓ Core Open Graph tags present', desc: 'Social sharing enhanced.' });
     }
 
-    // 8. Twitter Cards
+    // ----- 15. Twitter Cards
     const twitterCard = doc.querySelector('meta[name="twitter:card"]');
     const twitterTitle = doc.querySelector('meta[name="twitter:title"]');
     if (!twitterCard || !twitterTitle) {
@@ -1095,7 +1111,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         results.push({ status: 'pass', title: '✓ Twitter Cards configured', desc: 'Card type: ' + (twitterCard.getAttribute('content') || 'summary') });
     }
 
-    // 9. Favicon
+    // ----- 16. Favicon
     const favicon = doc.querySelector('link[rel~="icon"], link[rel="shortcut icon"]');
     if (!favicon) {
         results.push({ status: 'warning', title: 'Favicon missing', desc: 'Browser tabs show default icon, brand recognition reduced.', recommendation: 'Add <link rel="icon" type="image/x-icon" href="/favicon.ico">' });
@@ -1103,7 +1119,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         results.push({ status: 'pass', title: '✓ Favicon detected', desc: 'Improves user experience and brand identity.' });
     }
 
-    // 10. Internal vs external links (if baseUrl provided)
+    // ----- 17. Internal vs external links & empty href
     if (baseUrlForInfo) {
         const links = doc.querySelectorAll('a[href]');
         let internalCount = 0, externalCount = 0;
@@ -1120,19 +1136,107 @@ function performAudit(doc, baseUrlForInfo = null) {
                     const absolute = new URL(href, baseUrlForInfo);
                     if (absolute.origin === baseOrigin) internalCount++;
                     else externalCount++;
-                } catch(e) { /* invalid URL, ignore */ }
+                } catch(e) { /* invalid URL */ }
             });
-        } catch(e) { /* ignore URL parsing errors */ }
-        
+        } catch(e) { /* ignore */ }
         if (internalCount === 0 && links.length > 0) {
             results.push({ status: 'warning', title: 'No internal links found', desc: `Total ${links.length} links, all external or invalid.`, recommendation: 'Add internal links to help distribute page authority and improve crawl depth.' });
         } else if (internalCount > 0) {
             results.push({ status: 'pass', title: 'Internal linking structure', desc: `${internalCount} internal / ${externalCount} external links. Good for SEO.` });
         }
-        
         if (emptyHrefCount > 0) {
             results.push({ status: 'warning', title: `${emptyHrefCount} empty or javascript:void(0) links`, desc: 'These links provide no navigation value and may harm crawl efficiency.', recommendation: 'Use proper URLs or remove empty links.' });
         }
+    }
+
+    // ==================== NEW CHECKS (6 additional) ====================
+    // 18. hreflang tags
+    const hreflangs = doc.querySelectorAll('link[rel="alternate"][hreflang]');
+    if (hreflangs.length === 0) {
+        results.push({ status: 'warning', title: 'No hreflang tags found', desc: 'Important for international/multilingual sites.', recommendation: 'Add <link rel="alternate" hreflang="x" href="..." > for each language version.' });
+    } else {
+        results.push({ status: 'pass', title: '✓ hreflang tags present', desc: `Found ${hreflangs.length} language annotations.` });
+    }
+
+    // 19. External link nofollow usage
+    let externalDofollow = 0;
+    if (baseUrlForInfo) {
+        let baseOrigin = '';
+        try { baseOrigin = new URL(baseUrlForInfo).origin; } catch(e) {}
+        const allLinks = doc.querySelectorAll('a[href]');
+        allLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (!href) return;
+            try {
+                const absolute = new URL(href, baseUrlForInfo);
+                if (baseOrigin && absolute.origin !== baseOrigin) {
+                    const rel = link.getAttribute('rel') || '';
+                    if (!rel.includes('nofollow')) externalDofollow++;
+                }
+            } catch(e) {}
+        });
+    }
+    if (externalDofollow > 3) {
+        results.push({ status: 'warning', title: `${externalDofollow} external links are dofollow`, desc: 'Passing link equity to untrusted sites can hurt authority.', recommendation: 'Add rel="nofollow" or rel="ugc" for user‑generated/sponsored links.' });
+    } else if (externalDofollow > 0) {
+        results.push({ status: 'pass', title: 'External links well managed', desc: `Only ${externalDofollow} dofollow external links.` });
+    }
+
+    // 20. Heading hierarchy skipping
+    const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+    let lastLevel = 0;
+    let skipWarning = false;
+    for (let h of headings) {
+        let level = parseInt(h.tagName[1]);
+        if (lastLevel !== 0 && level > lastLevel + 1) {
+            skipWarning = true;
+            break;
+        }
+        lastLevel = level;
+    }
+    if (skipWarning) {
+        results.push({ status: 'fail', title: 'Heading levels skipped', desc: 'e.g., H2 followed by H4 without an H3 in between.', recommendation: 'Maintain a logical outline: H1 → H2 → H3 etc.' });
+    } else {
+        results.push({ status: 'pass', title: 'Heading hierarchy correct', desc: 'No skipped heading levels.' });
+    }
+
+    // 21. Obsolete meta keywords
+    const metaKeywords = doc.querySelector('meta[name="keywords"]');
+    if (metaKeywords && metaKeywords.getAttribute('content')?.trim()) {
+        results.push({ status: 'warning', title: 'Meta keywords tag is obsolete', desc: 'Google ignores it, but it may leak competitor keywords.', recommendation: 'Remove the <meta name="keywords"> tag entirely.' });
+    }
+
+    // 22. Title vs H1 similarity (Jaccard)
+    const h1El = doc.querySelector('h1');
+    if (titleEl && h1El) {
+        const titleWords = new Set(titleEl.innerText.toLowerCase().split(/\s+/));
+        const h1Words = new Set(h1El.innerText.toLowerCase().split(/\s+/));
+        const intersection = new Set([...titleWords].filter(x => h1Words.has(x)));
+        const union = new Set([...titleWords, ...h1Words]);
+        const similarity = intersection.size / union.size;
+        if (similarity < 0.4 && titleWords.size > 2 && h1Words.size > 2) {
+            results.push({ status: 'warning', title: 'Title and H1 are very different', desc: `Similarity score: ${Math.round(similarity*100)}%`, recommendation: 'Align title and H1 to reinforce the main topic.' });
+        } else {
+            results.push({ status: 'pass', title: 'Title & H1 well aligned', desc: `Thematic consistency: ${Math.round(similarity*100)}% match.` });
+        }
+    }
+
+    // 23. Alt text length validation
+    const imgsWithAlt = doc.querySelectorAll('img[alt]');
+    let shortAlt = 0, longAlt = 0;
+    imgsWithAlt.forEach(img => {
+        const alt = img.getAttribute('alt').trim();
+        if (alt.length > 0 && alt.length < 8) shortAlt++;
+        if (alt.length > 120) longAlt++;
+    });
+    if (shortAlt > 0) {
+        results.push({ status: 'warning', title: `${shortAlt} image(s) have very short alt text (<8 chars)`, desc: 'May lack descriptive value for accessibility.', recommendation: 'Use alt text that describes the image meaningfully.' });
+    }
+    if (longAlt > 0) {
+        results.push({ status: 'warning', title: `${longAlt} image(s) have excessively long alt text (>120 chars)`, desc: 'Screen readers may truncate.', recommendation: 'Keep alt text between 8 and 120 characters.' });
+    }
+    if (shortAlt === 0 && longAlt === 0 && imgsWithAlt.length > 0) {
+        results.push({ status: 'pass', title: '✓ Alt text length optimal', desc: 'All alt texts are within recommended 8‑120 characters.' });
     }
 
     return results;
@@ -1459,7 +1563,7 @@ function showLoginHistory() {
     if (history.length === 0) {
         container.innerHTML = '<p style="text-align:center; padding: 2rem;">No login records found in local storage.</p>';
     } else {
-        let html = '<table class="location-table"><td><th>Timestamp</th><th>Identity</th><th>Network Hash</th><th>Client Origin</th></tr>';
+        let html = '<table class="location-table"><tr><th>Timestamp</th><th>Identity</th><th>Network Hash</th><th>Client Origin</th></tr>';
         history.forEach(entry => {
             html += `<tr>
                 <td style="white-space:nowrap;">${new Date(entry.timestamp).toLocaleString()}</td>
@@ -1474,7 +1578,7 @@ function showLoginHistory() {
     document.getElementById('loginHistoryModal').style.display = 'flex';
 }
 
-// Forgot password flow (unchanged)
+// Forgot password flow
 document.getElementById('forgotPasswordLink').addEventListener('click', () => {
     document.getElementById('forgotModal').style.display = 'flex';
     document.getElementById('resetUsername').value = '';
