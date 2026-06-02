@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SEO Dashboard | Forgot Password + Security Q&A</title>
+    <title>SEO Dashboard | Keyword Tool + Backlink Checker + PDF Reports</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -239,6 +241,8 @@
             body { padding: 1rem 0.5rem; }
             .card { padding: 1.5rem; }
         }
+        
+        .keyword-chip { background: var(--accent); color: white; padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.85rem; margin: 0.25rem; display: inline-block; }
     </style>
 </head>
 <body>
@@ -283,7 +287,9 @@
                 <li><i class="fas fa-search"></i> <div><strong>SEO Audit Engine</strong><br><span style="font-size:0.9rem; color:var(--text-secondary);">Title, meta tags, headings, HTTPS, robots, word count.</span></div></li>
                 <li><i class="fas fa-tachometer-alt"></i> <div><strong>PageSpeed Insights</strong><br><span style="font-size:0.9rem; color:var(--text-secondary);">Performance & Core Web Vitals via Google API.</span></div></li>
                 <li><i class="fas fa-globe-americas"></i> <div><strong>Visitor Mapping</strong><br><span style="font-size:0.9rem; color:var(--text-secondary);">Geographic insights plotted on an interactive map.</span></div></li>
-                <li><i class="fas fa-database"></i> <div><strong>Cloud Sync Ready</strong><br><span style="font-size:0.9rem; color:var(--text-secondary);">Sync your local data directly to a Google Sheet backup.</span></div></li>
+                <li><i class="fas fa-lightbulb"></i> <div><strong>Keyword Suggest</strong><br><span style="font-size:0.9rem; color:var(--text-secondary);">Related keywords & questions via free API.</span></div></li>
+                <li><i class="fas fa-link"></i> <div><strong>Backlink Checker</strong><br><span style="font-size:0.9rem; color:var(--text-secondary);">Estimate referring domains (demo).</span></div></li>
+                <li><i class="fas fa-file-pdf"></i> <div><strong>PDF Reports</strong><br><span style="font-size:0.9rem; color:var(--text-secondary);">White‑label SEO audit exports.</span></div></li>
             </ul>
         </div>
     </div>
@@ -305,7 +311,7 @@
     
     <header style="margin-bottom: 2rem; animation: fadeInUp 0.4s ease-out backwards;">
         <h1>SEO & Visitor Intelligence</h1>
-        <div class="subhead">Multi‑User Architecture · Role‑Based Access · Local & Cloud Database</div>
+        <div class="subhead">Multi‑User Architecture · Keyword Tool · Backlink Checker · PDF Reports</div>
     </header>
 
     <div class="card full-width" style="padding: 1rem 2rem;">
@@ -332,12 +338,14 @@
                 <button id="clearHistoryBtn" style="background:#dc2626;"><i class="fas fa-trash"></i> Wipe</button>
                 <button id="manageUsersBtn" style="background:#7c3aed;"><i class="fas fa-users-cog"></i> Users</button>
                 <button id="viewLoginHistoryBtn" style="background:#ea580c;"><i class="fas fa-history"></i> Logs</button>
+                <button id="pdfReportBtn" style="background:#6b21a5;"><i class="fas fa-file-pdf"></i> PDF Report</button>
             </div>
         </div>
     </div>
 
     <div class="dashboard-grid">
         
+        <!-- SEO Inspector Card (unchanged) -->
         <div class="card delay-1">
             <div class="score-header">
                 <strong><i class="fas fa-laptop-code"></i> Website Inspector</strong>
@@ -363,6 +371,36 @@
             </div>
         </div>
 
+        <!-- Keyword Suggestion Tool (NEW) -->
+        <div class="card delay-2">
+            <div class="score-header">
+                <strong><i class="fas fa-lightbulb"></i> Keyword Suggestion Tool</strong>
+                <span class="badge">Free API</span>
+            </div>
+            <p style="margin-bottom:1rem;">Generate related keywords, questions & long-tail terms.</p>
+            <div class="input-group">
+                <input type="text" id="keywordInput" placeholder="e.g., seo tools" style="flex:2;">
+                <button id="suggestKeywordsBtn"><i class="fas fa-magic"></i> Suggest</button>
+            </div>
+            <div id="keywordResults" style="display:flex; flex-wrap:wrap; gap:8px; margin-top:1rem;"></div>
+            <div id="keywordLoading" style="display:none; margin-top:1rem;" class="spinner"></div>
+        </div>
+
+        <!-- Backlink Checker (NEW) -->
+        <div class="card delay-2">
+            <div class="score-header">
+                <strong><i class="fas fa-link"></i> Backlink Checker (Beta)</strong>
+                <span class="badge">Demo / Free API</span>
+            </div>
+            <p style="margin-bottom:1rem;">Fetch estimated referring domains (limited free tier).</p>
+            <div class="input-group">
+                <input type="text" id="backlinkUrl" placeholder="https://example.com">
+                <button id="checkBacklinksBtn"><i class="fas fa-database"></i> Check</button>
+            </div>
+            <div id="backlinkResult"></div>
+        </div>
+
+        <!-- Cloud Sync Card (unchanged) -->
         <div class="card delay-2" id="gsheetCard">
             <div class="score-header">
                 <strong><i class="fas fa-cloud-upload-alt"></i> Cloud Database Sync</strong>
@@ -379,6 +417,7 @@
             <div id="gsheetMessage" style="font-size: 0.85rem; margin-top: 1rem; font-weight: 500;"></div>
         </div>
 
+        <!-- SEO Results Card -->
         <div class="card full-width delay-3" id="resultsCard" style="display:none;">
             <div class="score-header">
                 <strong><i class="fas fa-clipboard-check"></i> SEO Technical Report</strong>
@@ -387,6 +426,7 @@
             <div id="auditResults" class="checklist"></div>
         </div>
 
+        <!-- PageSpeed Card -->
         <div class="card full-width delay-3" id="pagespeedCard" style="display:none;">
             <div class="score-header">
                 <strong><i class="fas fa-rocket"></i> Core Web Vitals & Performance</strong>
@@ -395,6 +435,7 @@
             <div id="pagespeedResults"></div>
         </div>
 
+        <!-- Visitor Analytics Card (unchanged) -->
         <div class="card full-width delay-3" id="visitorCard">
             <div class="score-header">
                 <strong><i class="fas fa-globe-americas"></i> Global Traffic Analytics</strong>
@@ -408,7 +449,7 @@
             </div>
             
             <div id="currentLocation" style="background: rgba(31, 94, 126, 0.05); border-left: 4px solid var(--accent); border-radius:0 1rem 1rem 0; padding:1.2rem; margin-bottom:1.5rem; font-weight:500;">
-                <i class="fas fa-satellite-dish" style="color:var(--accent); margin-right:8px; animation: pulse 2s infinite;"></i> Detecting your geographic footprint...
+                <i class="fas fa-satellite-dish" style="color:var(--accent); margin-right:8px;"></i> Detecting your geographic footprint...
             </div>
             
             <div id="map"></div>
@@ -434,7 +475,8 @@
             </div>
         </div>
 
-    </div> <footer>
+    </div> 
+    <footer>
         <p>Built for real-time monitoring and technical audits. <br>🔐 Privacy First: All IP addresses are irreversibly hashed locally.</p>
     </footer>
 </div>
@@ -1149,7 +1191,7 @@ function performAudit(doc, baseUrlForInfo = null) {
         }
     }
 
-    // ==================== NEW CHECKS (6 additional) ====================
+    // ==================== ADVANCED CHECKS (6 more) ====================
     // 18. hreflang tags
     const hreflangs = doc.querySelectorAll('link[rel="alternate"][hreflang]');
     if (hreflangs.length === 0) {
@@ -1379,7 +1421,7 @@ document.getElementById('runHtmlAuditBtn').addEventListener('click', function() 
     }
 });
 
-// PageSpeed (unchanged)
+// PageSpeed function (unchanged)
 async function runPagespeed() {
     let url = document.getElementById('targetUrl').value.trim();
     if (!url) { alert('Specify a valid target URL.'); return; }
@@ -1471,7 +1513,93 @@ async function runPagespeed() {
 }
 document.getElementById('runPagespeedBtn').addEventListener('click', runPagespeed);
 
-// --- Persistence & UI helpers ---
+// ==================== NEW FEATURES ====================
+// Keyword Suggestion Tool (Datamuse API)
+document.getElementById('suggestKeywordsBtn')?.addEventListener('click', async () => {
+    const kw = document.getElementById('keywordInput').value.trim();
+    if (!kw) return;
+    const container = document.getElementById('keywordResults');
+    const loading = document.getElementById('keywordLoading');
+    container.innerHTML = '';
+    loading.style.display = 'inline-block';
+    try {
+        // Datamuse API for related words (free, no key)
+        const res = await fetch(`https://api.datamuse.com/words?ml=${encodeURIComponent(kw)}&max=20`);
+        const data = await res.json();
+        if (data.length) {
+            data.slice(0,15).forEach(word => {
+                const chip = document.createElement('span');
+                chip.className = 'keyword-chip';
+                chip.innerText = word.word;
+                container.appendChild(chip);
+            });
+            // Add a few question-style suggestions
+            const questions = [`best ${kw}`, `${kw} guide`, `how to ${kw}`, `${kw} tools`];
+            questions.forEach(q => {
+                const chip = document.createElement('span');
+                chip.className = 'keyword-chip';
+                chip.style.background = 'var(--warning)';
+                chip.innerText = q;
+                container.appendChild(chip);
+            });
+        } else {
+            container.innerHTML = '<p>No suggestions found. Try another keyword.</p>';
+        }
+    } catch(e) {
+        container.innerHTML = '<p style="color:var(--danger);">API error. Try again later.</p>';
+    }
+    loading.style.display = 'none';
+});
+
+// Backlink Checker (demo using a free API proxy – replace with real key if needed)
+document.getElementById('checkBacklinksBtn')?.addEventListener('click', async () => {
+    let url = document.getElementById('backlinkUrl').value.trim();
+    if (!url) return;
+    if (!url.startsWith('http')) url = 'https://' + url;
+    const resultDiv = document.getElementById('backlinkResult');
+    resultDiv.innerHTML = '<div class="spinner"></div> Checking...';
+    try {
+        // Using a free CORS proxy + a mock backlink service (BacklinkAPI demo)
+        // Replace 'demo' with your actual API key from https://backlinkapi.com/ for real data
+        const apiKey = 'demo'; // limited demo key – will return mock data
+        const apiUrl = `https://backlinkapi.com/api/v1?url=${encodeURIComponent(url)}&api_key=${apiKey}`;
+        const proxy = 'https://api.allorigins.win/get?url=';
+        const response = await fetch(proxy + encodeURIComponent(apiUrl));
+        const data = await response.json();
+        let count = 'unknown';
+        try {
+            const parsed = JSON.parse(data.contents);
+            count = parsed.total_backlinks || 'N/A';
+        } catch(e) { count = 'demo (upgrade for real data)'; }
+        resultDiv.innerHTML = `<div class="check-item pass">Estimated referring domains: ${count}<br><small>Note: Free demo – for accurate backlinks use Ahrefs/Moz API.</small></div>`;
+    } catch(e) {
+        resultDiv.innerHTML = `<div class="check-item fail">Backlink check failed: ${e.message}</div>`;
+    }
+});
+
+// PDF Report Generation (exports SEO audit results card)
+document.getElementById('pdfReportBtn')?.addEventListener('click', async () => {
+    const element = document.getElementById('resultsCard');
+    if (!element || element.style.display === 'none') {
+        alert('Run an SEO audit first to generate a report.');
+        return;
+    }
+    const { jsPDF } = window.jspdf;
+    try {
+        const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff' });
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgProps = pdf.getImageProperties(imgData);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save('seo-audit-report.pdf');
+    } catch(err) {
+        alert('PDF generation failed: ' + err.message);
+    }
+});
+
+// --- Persistence & UI helpers (unchanged) ---
 const STORAGE_KEYS = { API_KEY:'user_api_key', TARGET_URL:'user_target_url', HTML_CODE:'user_html_code', ACTIVE_MODE:'user_active_mode', CHART_RANGE:'user_chart_range', THEME:'theme', ACCENT:'accent' };
 function saveInputs() {
     localStorage.setItem(STORAGE_KEYS.API_KEY, document.getElementById('apiKeyInput').value);
