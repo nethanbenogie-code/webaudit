@@ -1,0 +1,31 @@
+{
+  "name": "webaudit",
+  "version": "1.0.0",
+  "description": "SEO web audit tool for analyzing website performance and SEO metrics",
+  "main": "index.html",
+  "scripts": {
+    "dev": "live-server",
+    "build": "echo 'Build script - integrate with your bundler'",
+    "test": "jest",
+    "lint": "eslint src/",
+    "format": "prettier --write src/"
+  },
+  "keywords": [
+    "seo",
+    "audit",
+    "web-performance",
+    "accessibility",
+    "web-analysis"
+  ],
+  "author": "nethanbenogie-code",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^8.48.0",
+    "prettier": "^3.0.0",
+    "jest": "^29.6.0",
+    "live-server": "^1.2.2"
+  },
+  "dependencies": {
+    "axios": "^1.5.0"
+  }
+}
